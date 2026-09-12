@@ -1,0 +1,159 @@
+.section {
+  width: 100%;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(217, 150, 0, 0.09), transparent 35%),
+    linear-gradient(180deg, #fbf5e9 0%, #f5ead8 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.content {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 54px 24px 62px;
+}
+
+.heading {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold-dark);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+}
+
+.heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 35px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.heading p {
+  margin: 9px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.card {
+  min-height: 190px;
+  padding: 18px 17px 20px;
+  border: 1px solid rgba(120, 81, 32, 0.12);
+  border-radius: 7px;
+  background: rgba(255, 253, 247, 0.82);
+  box-shadow: var(--shadow);
+}
+
+.card:nth-child(5) {
+  grid-column: 2 / span 2;
+  min-height: 115px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.icon {
+  color: #e09600;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.number {
+  color: #8d806f;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.card h3 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.52;
+}
+
+@media (max-width: 800px) {
+  .content {
+    padding: 45px 18px 50px;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .card {
+    min-height: 205px;
+    padding: 17px 15px;
+  }
+
+  .card:nth-child(5) {
+    grid-column: 1 / -1;
+    min-height: 125px;
+  }
+}
+
+@media (max-width: 600px) {
+  .heading {
+    margin-bottom: 24px;
+  }
+
+  .eyebrow {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .heading h2 {
+    font-size: 31px;
+  }
+
+  .heading p {
+    font-size: 12px;
+  }
+
+  .card {
+    min-height: 205px;
+  }
+
+  .cardTop {
+    margin-bottom: 15px;
+  }
+
+  .icon {
+    font-size: 20px;
+  }
+
+  .card h3 {
+    font-size: 16px;
+  }
+
+  .card p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}

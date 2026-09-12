@@ -1,0 +1,110 @@
+.section {
+  width: 100%;
+  padding: 35px 24px 28px;
+  background: #fbf7ef;
+  color: var(--ink);
+}
+
+.items {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 0 28px;
+}
+
+.item + .item {
+  border-left: 1px solid rgba(73, 48, 27, 0.18);
+}
+
+.icon {
+  color: #e09600;
+  font-family: Georgia, serif;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.item h2 {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.item p {
+  max-width: 190px;
+  margin: 0;
+  color: #6f665d;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.signature {
+  width: min(760px, 100%);
+  margin: 28px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.signature span {
+  flex: 1;
+  height: 1px;
+  background: rgba(73, 48, 27, 0.2);
+}
+
+.signature p {
+  margin: 0;
+  color: #7c6e5f;
+  font-size: 8px;
+  letter-spacing: 2.4px;
+  white-space: nowrap;
+}
+
+.heart {
+  margin-top: 9px;
+  color: #e09600;
+  text-align: center;
+  font-size: 17px;
+}
+
+@media (max-width: 700px) {
+  .section {
+    padding: 28px 18px 23px;
+  }
+
+  .items {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .item {
+    padding: 0;
+  }
+
+  .item + .item {
+    border-left: 0;
+    border-top: 1px solid rgba(73, 48, 27, 0.14);
+    padding-top: 18px;
+  }
+
+  .item p {
+    max-width: none;
+  }
+
+  .signature {
+    gap: 8px;
+  }
+
+  .signature p {
+    font-size: 7px;
+    letter-spacing: 1.6px;
+  }
+}
