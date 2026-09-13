@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./HowItWorks.module.css";
 
 const steps = [
@@ -42,11 +43,33 @@ export default function HowItWorks() {
   return (
     <section className={styles.section} aria-labelledby="como-funciona">
       <div className={styles.content}>
-        <div className={styles.heading}>
-          <span className={styles.eyebrow}>SIMPLES, PERSONALIZADO E ESPECIAL</span>
-          <h2 id="como-funciona">Como funciona</h2>
-          <p>Da sua história até uma música criada para emocionar.</p>
-        </div>
+       <div className={styles.heading}>
+  <span className={styles.eyebrow}>SIMPLES, PERSONALIZADO E ESPECIAL</span>
+
+  <div className={styles.titleRow}>
+    <Image
+      src="/images/seta_esquerda.webp"
+      alt=""
+      width={180}
+      height={60}
+      className={styles.arrow}
+      aria-hidden="true"
+    />
+
+    <h2 id="como-funciona">Como funciona</h2>
+
+    <Image
+      src="/images/seta_direita.webp"
+      alt=""
+      width={180}
+      height={60}
+      className={styles.arrow}
+      aria-hidden="true"
+    />
+  </div>
+
+  <p>Da sua história até uma música criada para emocionar.</p>
+</div>
 
         <div className={styles.steps}>
           {steps.map((step) => (

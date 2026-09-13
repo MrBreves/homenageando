@@ -1,4 +1,5 @@
 .section {
+  box-sizing: border-box;
   width: 100%;
   padding: 35px 24px 28px;
   background: #fbf7ef;
@@ -34,7 +35,7 @@
   margin: 0 0 4px;
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -42,7 +43,7 @@
   max-width: 190px;
   margin: 0;
   color: #6f665d;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -63,7 +64,7 @@
 .signature p {
   margin: 0;
   color: #7c6e5f;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 2.4px;
   white-space: nowrap;
 }

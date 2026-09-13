@@ -45,7 +45,7 @@ export default function Hero() {
               src={photo.src}
               alt=""
               fill
-              sizes="(max-width: 700px) 42vw, 240px"
+              sizes="(max-width: 767px) 28vw, (max-width: 1199px) 10vw, 8vw"
               priority
             />
           </div>
@@ -57,20 +57,21 @@ export default function Hero() {
 
         <h1>
           Transforme seus sentimentos em uma{" "}
-          <span>homenagem única.</span>
+          <span className={styles.goldText}>Homenagem única.</span>
         </h1>
 
         <p className={styles.description}>
-          Crie sua música personalizada para homenagear alguém especial e
-          transformar sua história em uma lembrança inesquecível.
+           Uma história especial merece uma música INESQUECÍVEL.
         </p>
 
         <Link href="/criar" className={styles.cta}>
-          Criar minha homenagem <span aria-hidden="true">→</span>
+          <span>Criar homenagem</span>
+          <span aria-hidden="true">→</span>
+
         </Link>
 
         <span className={styles.note}>
-          Você ouvirá um preview de 35 segundos antes de comprar.
+          Você ouvirá um preview da música de 35s para conferir!
         </span>
       </div>
     </section>
