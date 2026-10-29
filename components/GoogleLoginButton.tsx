@@ -94,7 +94,7 @@ export default function GoogleLoginButton({
         }}
       >
          <Image
-          src="/images/png/google_btn.png"
+          src="/images/png/Google_btn.png"
           alt="Continuar com o Google"
           width={1200}
           height={500}
