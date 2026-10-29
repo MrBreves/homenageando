@@ -1280,7 +1280,7 @@ body > main {
 /* Botão Google — hover e efeito de clique */
 
 .auth-google-group .auth-google-image {
-  transform: scale(1);
+  transform: scale(4.5);
   transform-origin: center;
   filter: none;
   transition:
@@ -1290,13 +1290,13 @@ body > main {
 
 @media (hover: hover) {
   .auth-google-group button:hover:not(:disabled) .auth-google-image {
-    transform: scale(1.05);
+    transform: scale(4.65);
     filter: drop-shadow(0 5px 7px rgba(173, 111, 27, 0.30));
   }
 }
 
 .auth-google-group button:active:not(:disabled) .auth-google-image {
-  transform: scale(0.97) translateY(1px);
+  transform: scale(4.35) translateY(1px);
   filter: drop-shadow(0 1px 2px rgba(173, 111, 27, 0.12));
 }
 
