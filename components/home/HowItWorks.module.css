@@ -1,20 +1,17 @@
 .section {
   width: 100%;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(217, 150, 0, 0.09), transparent 35%),
-    linear-gradient(180deg, #fbf5e9 0%, #f5ead8 100%);
-  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, #fffaf2 0%, #fbf4e8 100%);
+  color: #2b1b13;
 }
 
 .content {
-  width: min(1180px, 100%);
-  max-width: calc(100% - 48px);
-  margin: 0 auto;
-  padding: 15px 24px 62px;
+  width: min(1180px, calc(100% - 64px));
+  margin-inline: auto;
+  padding: 22px 0 54px;
 }
 
 .heading {
-  margin-bottom: 32px;
+  margin: 0 0 30px;
   text-align: center;
 }
 
@@ -22,67 +19,71 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 50px;
+  gap: clamp(12px, 2.6vw, 34px);
 }
 
-.arrow {
-  width: 35px;
-  height: auto;
+.ornament {
+  flex: 0 1 64px;
+  width: 192px;
+  height: 69px;
   object-fit: contain;
-  position: relative;
-  top: 10px;
+  overflow: visible;
 }
 
-
-.eyebrow {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--gold-dark);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2.8px;
+.ornamentRight {
+  object-position: center;
 }
 
 .heading h2 {
+  flex: 0 0 auto;
   margin: 0;
-  color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 30px;
+  color: #2b1b13;
+  font-family: var(--font-playfair-display), Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 4vw, 50px);
   font-weight: 400;
-  line-height: 1.15;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  display: block;
+  margin-top: 3px;
+  color: #8b5a18;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
 }
 
 .heading p {
-  margin: 9px 0 0;
-  color: var(--ink-soft);
-  font-size: 15px;
+  margin: 8px 0 0;
+  color: #65564d;
+  font-family: var(--font-playfair-display), Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
 }
 
 .card {
+  min-width: 0;
   min-height: 190px;
-  padding: 18px 17px 20px;
-  border: 1px solid rgba(120, 81, 32, 0.12);
+  padding: 20px 18px;
+  border: 1px solid rgba(120, 81, 32, 0.14);
   border-radius: 16px;
-  background: rgba(255, 253, 247, 0.82);
-  box-shadow:  0 8px 22px rgba(61, 18, 18, 0.14);
-}
-
-.card:nth-child(5) {
-  grid-column: 2 / span 2;
-  min-height: 115px;
+  background: rgba(255, 253, 247, 0.9);
+  box-shadow: 0 7px 20px rgba(61, 42, 26, 0.1);
 }
 
 .cardTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 17px;
 }
 
 .icon {
@@ -92,7 +93,8 @@
 }
 
 .number {
-  color: #8d806f;
+  color: #9d866c;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -100,125 +102,221 @@
 
 .card h3 {
   margin: 0 0 9px;
-  color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 21px;
+  color: #2b1b13;
+  font-family: var(--font-playfair-display), Georgia, "Times New Roman", serif;
+  font-size: 20px;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .card p {
   margin: 0;
-  color: var(--ink-soft);
+  color: #5c4d43;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-@media (min-width: 1200px) {
-
- .arrow {
-    width: 25px;
-  }
-
-  .eyebrow {
-    font-size: 11px;
-  }
-
-  .heading h2 {
-    font-size: 46px;
-  }
-
-  .heading p {
-    font-size: 17px;
-  }
-}
-
-@media (max-width: 800px) {
-
-.titleRow {
-    gap: 45px;
-  }
-
-.arrow {
-  width: 45px;
-  top: 12px;
-}
-
+/* Tablet: dois cartões na primeira linha e o terceiro centralizado. */
+@media (min-width: 600px) and (max-width: 1023px) {
   .content {
-    max-width: calc(100% - 36px);
-    padding: 15px 18px 50px;
+    width: min(820px, calc(100% - 48px));
+    padding: 100px 0 44px;
+  }
+
+  .heading {
+    margin-bottom: 25px;
   }
 
   .steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 14px;
   }
 
   .card {
-    min-height: 205px;
-    padding: 17px 15px;
+    min-height: 170px;
   }
 
-  .card:nth-child(5) {
+  .card:last-child {
     grid-column: 1 / -1;
-    min-height: 125px;
-  }
-
-  .card h3 {
-    font-size: 19px;
-    line-height: 1.2;
-  }
-
-  .card p {
-    font-size: 18px;
-    line-height: 1.52;
+    justify-self: center;
+    width: calc((100% - 14px) / 2);
   }
 }
 
-@media (max-width: 600px) {
-
+/* Mobile: one full-width card per row; text stays readable without zooming. */
+@media (max-width: 599px) {
+  .content {
+    width: calc(100% - 36px);
+    padding: 44px 0 36px;
+  }
 
   .heading {
-    margin-bottom: 24px;
+    margin-bottom: 21px;
+  }
+
+  .titleRow {
+    gap: 9px;
+  }
+
+   .ornament {
+    flex-basis: 66px;
+    width: 66px;
+    height: auto;
+    aspect-ratio: 1881 / 678;
+  }
+
+  .heading h2 {
+    font-size: 30px;
+    white-space: nowrap;
   }
 
   .eyebrow {
     font-size: 8px;
-    letter-spacing: 2px;
-  }
-
-.titleRow {
-    gap: 50px;
-  }
-
-
-  .heading h2 {
-    font-size: 22px;
+    letter-spacing: 0.18em;
   }
 
   .heading p {
-    margin-top: 3px;
-    font-size: 13px;
+    max-width: 32ch;
+    margin: 7px auto 0;
+    font-size: 14px;
+  }
+
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
   }
 
   .card {
-    min-height: 205px;
+    min-height: 0;
+    padding: 16px 18px 18px;
   }
 
   .cardTop {
-    margin-bottom: 15px;
-  }
-
-  .icon {
-    font-size: 20px;
+    margin-bottom: 11px;
   }
 
   .card h3 {
-    font-size: 17px;
+    margin-bottom: 6px;
+    font-size: 19px;
   }
 
   .card p {
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.45;
   }
+}
+
+/* ==========================================================
+   STORIES DO INSTAGRAM
+   ========================================================== */
+
+@media (min-width: 1000px) and (max-width: 1200px) and (min-height: 1600px) and (max-aspect-ratio: 10/17) {
+  .content {
+    width: 91%;
+    padding: 11vw 0 9vw;
+  }
+
+  .heading {
+    margin-bottom: 5.25vw;
+  }
+
+  .titleRow {
+    gap: 2.25vw;
+  }
+
+  .ornament {
+    flex: 0 1 16.5vw;
+    width: 16.5vw;
+    height: auto;
+    aspect-ratio: 1881 / 678;
+  }
+
+  .heading h2 {
+    font-size: 7.5vw;
+    white-space: nowrap;
+  }
+
+  .eyebrow {
+    font-size: 2vw;
+    letter-spacing: 0.18em;
+  }
+
+  .heading p {
+    max-width: 32ch;
+    margin: 1.75vw auto 0;
+    font-size: 3.5vw;
+  }
+
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.75vw;
+  }
+
+  .card:last-child {
+    grid-column: auto;
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .card {
+    min-height: 0;
+    padding: 4vw 4.5vw 4.5vw;
+    border-radius: 4vw;
+  }
+
+  .cardTop {
+    margin-bottom: 2.75vw;
+  }
+
+  .icon {
+    font-size: 5.75vw;
+  }
+
+  .number {
+    font-size: 2.5vw;
+  }
+
+  .card h3 {
+    margin-bottom: 1.5vw;
+    font-size: 4.75vw;
+  }
+
+  .card p {
+    font-size: 3.5vw;
+    line-height: 1.45;
+  }
+}
+
+/* ==========================================================
+   TELAS GRANDES — REGRA DESATIVADA
+   Código preservado para eventual reativação.
+   ========================================================== */
+
+/*
+@media (min-width: 1920px) {
+  .ornament {
+    flex: 0 0 448px;
+    width: 224px;
+    height: 80px;
+  }
+}
+*/
+/* Player em imagem: mantém a posição e a largura de cada tela. */
+.example.imageExample {
+  display: block;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4.5 / 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.example.imageExample .exampleImage {
+  object-fit: cover;
+  object-position: center;
 }

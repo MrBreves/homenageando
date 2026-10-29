@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local Netlify folder
+.netlify
+
+# Windows
+desktop.ini
+Thumbs.db
+
+# Backups and local data
+/backups/
+/data/
+
+# Local documentation and development files
+/requisitos/
+/consulta_header_admin.txt
+
+# Generated and temporary assets
+/homenageando_hero_camadas/
+/homenageando_hero_camadas.zip
+
+# Local development tools
+/tools/

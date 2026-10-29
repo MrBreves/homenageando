@@ -1,0 +1,90 @@
+/* Navegação compacta dentro da faixa fixa de progresso. */
+.navigation {
+  display: flex;
+  flex: 0 0 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.back,
+.next {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.back {
+  background: transparent;
+  color: #5c4030;
+}
+
+.next {
+  margin-left: auto;
+  border-color: #dac7ab;
+  background: #fff0ce;
+  color: #2b1b13;
+}
+
+.back:disabled {
+  visibility: hidden;
+}
+
+.next:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back:focus-visible,
+.next:focus-visible {
+  outline: 2px solid #82501c;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .back:hover:not(:disabled) {
+    background: #f3e8d8;
+  }
+
+  .next:hover:not(:disabled) {
+    border-color: #b88130;
+    background: #ffe8b5;
+  }
+}
+
+/* Mobile. */
+@media (max-width: 599px) {
+  .navigation {
+    gap: 8px;
+  }
+
+  .back,
+  .next {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Telas grandes. */
+@media (min-width: 1920px) {
+  .back,
+  .next {
+    padding: 8px 18px;
+    font-size: 15px;
+  }
+}
