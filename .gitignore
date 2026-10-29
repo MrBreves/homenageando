@@ -47,9 +47,8 @@ next-env.d.ts
 desktop.ini
 Thumbs.db
 
-# Backups and local data
+# Backups
 /backups/
-/data/
 
 # Local documentation and development files
 /requisitos/
