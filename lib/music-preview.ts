@@ -1,4 +1,6 @@
 import { execFile } from "node:child_process";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import {
   access,
   mkdtemp,
@@ -7,8 +9,8 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import path from "node:path";
 import { promisify } from "node:util";
+import path from "node:path";
 
 const execFileAsync = promisify(execFile);
 
@@ -25,29 +27,12 @@ export async function createMusicPreview(
     throw new Error("O tamanho do áudio recebido é inválido.");
   }
 
-  const isWindows = process.platform === "win32";
-  const executableSuffix = isWindows ? ".exe" : "";
+  const ffmpegPath = ffmpegInstaller.path;
+  const ffprobePath = ffprobeInstaller.path;
 
-  if (!isWindows && process.platform !== "linux") {
-    throw new Error("Sistema operacional de audio nao suportado.");
+  if (!ffmpegPath || !ffprobePath) {
+    throw new Error("Executáveis FFmpeg ou FFprobe indisponíveis.");
   }
-
-  const binaryDirectory = path.join(
-    process.cwd(),
-    "tools",
-    "ffmpeg",
-    isWindows ? "bin" : "linux-x64",
-  );
-
-  const ffmpegPath = path.join(
-    binaryDirectory,
-    `ffmpeg${executableSuffix}`,
-  );
-
-  const ffprobePath = path.join(
-    binaryDirectory,
-    `ffprobe${executableSuffix}`,
-  );
 
   await Promise.all([
     access(ffmpegPath),
