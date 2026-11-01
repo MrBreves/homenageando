@@ -982,17 +982,17 @@
 
 @media (max-width: 599px) {
   .previewTitle {
-    margin: 0 0 22px;
-    font-size: 28px;
+    margin: 0 0 14px;
+    font-size: 22px;
     font-weight: 650;
-    line-height: 1.2;
+    line-height: 1.25;
     letter-spacing: -0.02em;
     overflow-wrap: break-word;
   }
 
   .previewMusicTitle {
-    margin: 18px 0 20px;
-    font-size: 22px;
+    margin: 12px 0 14px;
+    font-size: 18px;
     font-weight: 600;
     line-height: 1.35;
     letter-spacing: -0.01em;
@@ -1000,9 +1000,16 @@
   }
 
   .previewQuestionTitle {
-    margin: 28px 0 14px;
-    font-size: 24px;
+    margin: 18px 0 10px;
+    font-size: 20px;
     font-weight: 650;
     line-height: 1.25;
+  }
+
+  .previewPlayButton,
+  .previewPaymentButton {
+    min-height: 46px;
+    padding: 11px 16px;
+    font-size: 14px;
   }
 }
