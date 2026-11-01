@@ -174,6 +174,13 @@ async function handlePOST(request: NextRequest) {
       ) {
         console.error("[MUSIC_RESULT_FORMAT]", {
           keys: Object.keys(musicResult),
+          resultObjectType: typeof musicResult.resultObject,
+          resultObjectKeys:
+            typeof musicResult.resultObject === "object" &&
+            musicResult.resultObject !== null &&
+            !Array.isArray(musicResult.resultObject)
+              ? Object.keys(musicResult.resultObject)
+              : [],
           code: musicResult.code,
           taskIdMatches:
             musicResult.task_id === order.kie_task_id,
