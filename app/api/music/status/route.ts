@@ -307,7 +307,17 @@ async function handlePOST(request: NextRequest) {
     }
 
     return json(status);
-  } catch {
+  } catch (error) {
+    console.error(
+      "[MUSIC_STATUS] Falha na consulta ou processamento:",
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+          }
+        : "Erro desconhecido",
+    );
+
     return json(
       { error: "Não foi possível consultar a geração agora." },
       502,
