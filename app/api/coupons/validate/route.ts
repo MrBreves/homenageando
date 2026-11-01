@@ -281,7 +281,7 @@ async function handlePOST(request: NextRequest) {
 
   try {
     const { data, error } = await supabaseAdmin.rpc(
-      "validate_homenageando_coupon",
+      "validate_homenageando_coupon_pending_compatible",
       {
         p_code: couponCode,
         p_user_id: user.id,

@@ -207,7 +207,7 @@ async function handlePOST(request: NextRequest) {
   } = await supabase
     .from("orders")
     .select(
-      "id, os_number, state, payment_status, payment_provider, payment_amount_cents, order_number, mercadopago_preference_id"
+      "id, os_number, state, payment_status, payment_provider, payment_amount_cents, order_number, mercadopago_preference_id, applied_coupon_code, payment_external_id, payment_approved_at"
     )
     .eq("id", orderId)
     .eq("user_id", user.id)
@@ -228,6 +228,37 @@ async function handlePOST(request: NextRequest) {
     currentOrder.state === "AGUARDANDO_PAGAMENTO" &&
     currentOrder.payment_status === "PENDING"
   ) {
+    const existingCode = (currentOrder.applied_coupon_code ?? "").toUpperCase();
+    if (couponCode !== existingCode) {
+      if (!couponCode) {
+        return fail("Para substituir o cupom, informe e valide um novo código.", 409);
+      }
+      if (currentOrder.payment_external_id || currentOrder.payment_approved_at) {
+        return fail("Existe uma transação registrada para este pedido. Consulte o suporte antes de alterar o desconto.", 409);
+      }
+
+      // Troca atômica apenas para cortesia integral. Não reutiliza preferência paga.
+      const { data: freeSwap, error: freeSwapError } = await supabase.rpc(
+        "complete_homenageando_pending_with_free_coupon",
+        { p_order_id: orderId, p_user_id: user.id, p_coupon_code: couponCode },
+      );
+      if (freeSwapError) {
+        console.error("Falha na substituição de cupom integral:", freeSwapError);
+        return fail("Não foi possível concluir a troca do cupom com segurança.", 503);
+      }
+      if (!freeSwap?.success) {
+        return fail(freeSwap?.error ?? "Cupom indisponível para substituir o desconto atual.", 409);
+      }
+      return NextResponse.json({
+        success: true,
+        paymentMode: "coupon",
+        state: freeSwap.state,
+        paymentStatus: freeSwap.paymentStatus,
+        totalAmountCents: 0,
+        discountAmountCents: 3990,
+        couponCode: freeSwap.couponCode,
+      }, { headers: { "Cache-Control": "no-store" } });
+    }
     if (
       paymentMode === "test" &&
       currentOrder.payment_provider === "TEST"

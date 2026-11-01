@@ -259,6 +259,34 @@ export default function CriarPage() {
             }
 
                                     if (order.state === "AGUARDANDO_PAGAMENTO") {
+              const { data: pricing, error: pricingError } = await supabase
+                .from("orders")
+                .select("applied_coupon_code, original_amount_cents, discount_amount_cents, payment_amount_cents")
+                .eq("id", order.id)
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+              if (pricingError || !pricing) {
+                setPaymentError("Não foi possível recuperar os valores do pedido. Atualize a página.");
+              } else if (
+                pricing.applied_coupon_code &&
+                pricing.original_amount_cents === 3990 &&
+                Number.isInteger(pricing.discount_amount_cents) &&
+                pricing.payment_amount_cents === 3990 - pricing.discount_amount_cents
+              ) {
+                setAppliedCoupon({
+                  code: pricing.applied_coupon_code,
+                  discountType: "FIXED",
+                  discountPercent: null,
+                  discountFixedCents: pricing.discount_amount_cents,
+                  originalAmountCents: 3990,
+                  discountAmountCents: pricing.discount_amount_cents,
+                  totalAmountCents: pricing.payment_amount_cents,
+                });
+                setCouponCode(pricing.applied_coupon_code);
+                setCouponEnabled(true);
+              }
+
               savePreviewAuthPending(false);
               setPaymentStarted(true);
               setQuestionnaireState("PAGAMENTO");
@@ -1171,9 +1199,7 @@ if (questionnaireState === "PAGAMENTO") {
             aria-controls="checkout-coupon-content"
             onClick={() => {
               setCouponEnabled(!couponEnabled);
-              setCouponCode("");
               setCouponError(null);
-              setAppliedCoupon(null);
             }}
           >
             <span className={styles.couponToggleLabel}>
@@ -1198,17 +1224,12 @@ if (questionnaireState === "PAGAMENTO") {
                   autoComplete="off"
                   placeholder="Digite ou cole seu cupom"
                   aria-label="Código do cupom"
-                  disabled={
-                    couponValidating ||
-                    paymentStarted ||
-                    startingPayment
-                  }
+                  disabled={couponValidating || startingPayment}
                   onChange={(event) => {
                     setCouponCode(
                       event.target.value.toUpperCase(),
                     );
                     setCouponError(null);
-                    setAppliedCoupon(null);
                   }}
                   className={styles.couponInput}
                 />
@@ -1219,7 +1240,6 @@ if (questionnaireState === "PAGAMENTO") {
                   disabled={
                     !couponCode.trim() ||
                     couponValidating ||
-                    paymentStarted ||
                     startingPayment
                   }
                   onClick={async () => {
@@ -1233,7 +1253,6 @@ if (questionnaireState === "PAGAMENTO") {
 
                     setCouponValidating(true);
                     setCouponError(null);
-                    setAppliedCoupon(null);
 
                     try {
                       const {
@@ -1381,18 +1400,20 @@ if (questionnaireState === "PAGAMENTO") {
                           .replace(".", ",")} de desconto`}
                   </p>
 
-                  <button
-                    type="button"
-                    className={styles.couponRemove}
-                    disabled={paymentStarted || startingPayment}
-                    onClick={() => {
-                      setCouponCode("");
-                      setCouponError(null);
-                      setAppliedCoupon(null);
-                    }}
-                  >
-                    Remover cupom
-                  </button>
+                  {!paymentStarted && (
+                    <button
+                      type="button"
+                      className={styles.couponRemove}
+                      disabled={startingPayment}
+                      onClick={() => {
+                        setCouponCode("");
+                        setCouponError(null);
+                        setAppliedCoupon(null);
+                      }}
+                    >
+                      Remover cupom
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1482,6 +1503,10 @@ if (questionnaireState === "PAGAMENTO") {
               if (startingPayment) {
                 return;
               }
+              if (couponEnabled && couponCode.trim().toUpperCase() !== (appliedCoupon?.code ?? "")) {
+                setCouponError("Clique em Aplicar para validar o cupom digitado.");
+                return;
+              }
 
               setStartingPayment(true);
               setPaymentError(null);
@@ -1565,7 +1590,11 @@ if (questionnaireState === "PAGAMENTO") {
               }
             }}
           >
-            {startingPayment ? "Registrando pedido…" : "Pagar"}
+            {startingPayment
+              ? "Registrando pedido…"
+              : appliedCoupon?.totalAmountCents === 0
+                ? "Concluir com cupom de 100%"
+                : "Pagar"}
           </button>
         )}
 
