@@ -1133,9 +1133,7 @@ if (questionnaireState === "PAGAMENTO") {
             Música personalizada completa e letra incluída.
           </p>
 
-          <p>
-            <strong>R$ 39,90</strong>
-          </p>
+
         </section>
 
         <section className={styles.checkoutCard}>
