@@ -1169,7 +1169,6 @@ if (questionnaireState === "PAGAMENTO") {
             className={styles.couponToggle}
             aria-expanded={couponEnabled}
             aria-controls="checkout-coupon-content"
-            disabled={paymentStarted || startingPayment}
             onClick={() => {
               setCouponEnabled(!couponEnabled);
               setCouponCode("");
