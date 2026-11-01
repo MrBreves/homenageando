@@ -181,6 +181,30 @@ async function handlePOST(request: NextRequest) {
             !Array.isArray(musicResult.resultObject)
               ? Object.keys(musicResult.resultObject)
               : [],
+          lyricsDataType:
+            typeof (
+              musicResult.resultObject as Record<string, unknown>
+            )?.lyricsData,
+          lyricsDataIsArray:
+            Array.isArray(
+              (
+                musicResult.resultObject as Record<string, unknown>
+              )?.lyricsData
+            ),
+          lyricsDataFirstItemKeys:
+            Array.isArray(
+              (
+                musicResult.resultObject as Record<string, unknown>
+              )?.lyricsData
+            )
+              ? Object.keys(
+                  (
+                    (
+                      musicResult.resultObject as Record<string, unknown>
+                    ).lyricsData as unknown[]
+                  )[0] ?? {}
+                )
+              : [],
           code: musicResult.code,
           taskIdMatches:
             musicResult.task_id === order.kie_task_id,
