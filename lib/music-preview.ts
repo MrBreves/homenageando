@@ -26,7 +26,6 @@ export async function createMusicPreview(
   }
 
   const isWindows = process.platform === "win32";
-  const executableSuffix = isWindows ? ".exe" : "";
 
   if (!isWindows && process.platform !== "linux") {
     throw new Error("Sistema operacional de audio nao suportado.");
@@ -36,23 +35,34 @@ export async function createMusicPreview(
     process.cwd(),
     "tools",
     "ffmpeg",
-    isWindows ? "bin" : "linux-x64",
+    "bin",
   );
 
-  const ffmpegPath = path.join(
-    binaryDirectory,
-    `ffmpeg${executableSuffix}`,
-  );
+  const ffmpegPath = isWindows
+    ? path.join(binaryDirectory, "ffmpeg.exe")
+    : "ffmpeg";
 
-  const ffprobePath = path.join(
-    binaryDirectory,
-    `ffprobe${executableSuffix}`,
-  );
+  const ffprobePath = isWindows
+    ? path.join(binaryDirectory, "ffprobe.exe")
+    : "ffprobe";
 
-  await Promise.all([
-    access(ffmpegPath),
-    access(ffprobePath),
-  ]);
+  if (isWindows) {
+    await Promise.all([
+      access(ffmpegPath),
+      access(ffprobePath),
+    ]);
+  } else {
+    await Promise.all([
+      execFileAsync(ffmpegPath, ["-version"], {
+        timeout: 15000,
+        windowsHide: true,
+      }),
+      execFileAsync(ffprobePath, ["-version"], {
+        timeout: 15000,
+        windowsHide: true,
+      }),
+    ]);
+  }
 
   const temporaryDirectory = await mkdtemp(
     path.join(tmpdir(), "homenageando-preview-"),
