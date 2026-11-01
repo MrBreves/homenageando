@@ -172,6 +172,18 @@ async function handlePOST(request: NextRequest) {
         musicResult.task_id !== order.kie_task_id ||
         !Array.isArray(musicResult.data)
       ) {
+        console.error("[MUSIC_RESULT_FORMAT]", {
+          keys: Object.keys(musicResult),
+          code: musicResult.code,
+          taskIdMatches:
+            musicResult.task_id === order.kie_task_id,
+          dataIsArray: Array.isArray(musicResult.data),
+          resultUrlsIsArray: Array.isArray(musicResult.resultUrls),
+          resultUrlsCount: Array.isArray(musicResult.resultUrls)
+            ? musicResult.resultUrls.length
+            : null,
+        });
+
         throw new Error("Resultado incompatível com a tarefa.");
       }
 
