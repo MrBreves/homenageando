@@ -1124,3 +1124,25 @@
     font-size: 15px;
   }
 }
+
+
+/* CHECKOUT BOTAO FIXO MOBILE OS0001 */
+@media (max-width: 599px) {
+  .paymentPage .container {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .paymentPage .checkoutPayButton {
+    position: fixed;
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 460px;
+    min-height: 50px;
+    margin: 0;
+    z-index: 100;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(43, 27, 19, 0.2);
+  }
+}

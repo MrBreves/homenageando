@@ -1138,43 +1138,6 @@ if (questionnaireState === "PAGAMENTO") {
           </p>
         </section>
 
-        <section className={styles.streamingSection}>
-          <fieldset className={styles.streamingFieldset}>
-            <legend>
-              Publicar nas plataformas de streaming?
-            </legend>
-
-            <label className={styles.streamingOptionDisabled}>
-              <input
-                type="radio"
-                name="streamingPublication"
-                value="yes"
-                disabled
-              />
-              <span>Sim — Em breve</span>
-            </label>
-
-            <p className={styles.streamingAdditional}>
-              Adicional de R$ 19,90
-            </p>
-
-            <label className={styles.streamingOption}>
-              <input
-                type="radio"
-                name="streamingPublication"
-                value="no"
-                defaultChecked
-              />
-              <span>Não</span>
-            </label>
-          </fieldset>
-
-          <p className={styles.streamingNotice}>
-            A publicação nas plataformas de streaming ainda não está
-            disponível e não será adicionada ao pagamento atual.
-          </p>
-        </section>
-
         <section className={styles.checkoutCard}>
           <h2>Resumo do pedido</h2>
 
