@@ -1013,3 +1013,114 @@
     font-size: 14px;
   }
 }
+
+/* HOMENAGEANDO CHECKOUT MOBILE FINAL */
+@media (max-width: 599px) {
+
+  .paymentPage .container {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .paymentPage .container > h1 {
+    font-size: 23px;
+    line-height: 1.2;
+    margin: 10px 0 14px;
+  }
+
+  .paymentPage .container > section:not(.checkoutCard):not(.streamingSection) {
+    margin: 10px 0 12px;
+  }
+
+  .paymentPage .container > section:not(.checkoutCard):not(.streamingSection) > h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    margin: 10px 0;
+    overflow-wrap: anywhere;
+  }
+
+  .paymentPage .container > section:not(.checkoutCard):not(.streamingSection) > p {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 8px 0;
+  }
+
+  .paymentPage .streamingSection {
+    margin: 12px 0;
+  }
+
+  .paymentPage .streamingFieldset {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .paymentPage .streamingFieldset legend {
+    font-size: 14px;
+    line-height: 1.3;
+    padding: 0 6px;
+  }
+
+  .paymentPage .streamingOption,
+  .paymentPage .streamingOptionDisabled {
+    min-height: 44px;
+    padding: 9px 11px;
+    margin: 5px 0;
+    font-size: 14px;
+    gap: 9px;
+  }
+
+  .paymentPage .streamingAdditional {
+    font-size: 12px;
+    margin: 4px 0 8px 26px;
+  }
+
+  .paymentPage .streamingNotice {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 8px 0;
+  }
+
+  .paymentPage .checkoutCard {
+    padding: 15px 13px;
+    margin: 12px 0;
+    border-radius: 13px;
+  }
+
+  .paymentPage .checkoutCard h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+
+  .paymentPage .checkoutCard hr {
+    margin: 12px 0;
+  }
+
+  .paymentPage .couponToggle {
+    min-height: 46px;
+    padding: 9px 10px;
+    margin: 10px 0;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .paymentPage .couponToggleLabel {
+    gap: 8px;
+  }
+
+  .paymentPage .couponPanel {
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .paymentPage .checkoutCard > div[style*="font-size"] {
+    font-size: 17px !important;
+    margin-top: 12px !important;
+  }
+
+  .paymentPage .checkoutPayButton {
+    min-height: 46px;
+    padding: 11px 15px;
+    font-size: 15px;
+  }
+}

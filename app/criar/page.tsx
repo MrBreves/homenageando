@@ -1093,7 +1093,7 @@ if (questionnaireState === "PREVIEW_PAGAMENTO") {
 
 if (questionnaireState === "PAGAMENTO") {
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${styles.paymentPage}`}>
       <div className={styles.container}>
         <h1>Pagamento</h1>
         {orderSummary}
@@ -1468,9 +1468,7 @@ if (questionnaireState === "PAGAMENTO") {
         </section>
 
 
-                <p>
-          Pagamento simulado em modo de teste.
-        </p>
+
 
         {paymentError && (
           <p role="alert">{paymentError}</p>
@@ -1583,62 +1581,8 @@ if (questionnaireState === "PAGAMENTO") {
           </button>
         )}
 
-        {paymentStarted && (
-          <p role="status">
-            Pedido registrado. A música completa permanece bloqueada
-            até a aprovação do pagamento.
-          </p>
-        )}
 
-        <button
-          type="button"
-          className={styles.checkoutButtonSecondary}
-          disabled={!paymentStarted || startingPayment}
-          onClick={async () => {
-            const order = await getCurrentUserOrder();
 
-            if (!order) {
-              throw new Error("Pedido não encontrado.");
-            }
-
-            const {
-              data: { session },
-            } = await supabase.auth.getSession();
-
-            if (!session) {
-              throw new Error("Usuário não autenticado.");
-            }
-
-            const response = await fetch("/api/payment/approve", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.access_token}`,
-              },
-              body: JSON.stringify({
-                orderId: order.id,
-              }),
-            });
-
-            if (!response.ok) {
-              throw new Error(
-                "Não foi possível aprovar o pagamento.",
-              );
-            }
-
-            const result = await response.json();
-
-if (
-  result.state === "MUSICA_1_DISPONIVEL" ||
-  result.state === "PAGAMENTO_CONFIRMADO"
-) {
-  setQuestionnaireState("PAGAMENTO_CONFIRMADO");
-  return;
-}
-          }}
-        >
-          Simular pagamento aprovado
-        </button>
       </div>
     </main>
   );
