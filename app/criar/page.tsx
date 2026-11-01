@@ -1474,7 +1474,7 @@ if (questionnaireState === "PAGAMENTO") {
           <p role="alert">{paymentError}</p>
         )}
 
-        {!paymentStarted && (
+        {(
           <button
             type="button"
             className={styles.checkoutPayButton}
@@ -1539,18 +1539,7 @@ if (questionnaireState === "PAGAMENTO") {
                   return;
                 }
 
-                // Pagamento com valor maior que zero:
-                // continua no fluxo de aprovação simulada.
-                if (
-                  result.paymentMode === "test" &&
-                  result.state === "AGUARDANDO_PAGAMENTO" &&
-                  result.paymentStatus === "PENDING"
-                ) {
-                  setPaymentStarted(true);
-                  return;
-                }
-
-                // Preparado para o fluxo Mercado Pago:
+                // Fluxo de pagamento real Mercado Pago:
                 // só redireciona quando esse modo estiver ativo.
                 if (
                   (result.paymentMode === "mercadopago_test" ||
