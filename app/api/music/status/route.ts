@@ -165,54 +165,30 @@ async function handlePOST(request: NextRequest) {
         throw new Error("Resultado musical inválido.");
       }
 
-      const musicResult = parsed as Record<string, unknown>;
+       const musicResult = parsed as Record<string, unknown>;
 
       if (
-        musicResult.code !== 200 ||
-        musicResult.task_id !== order.kie_task_id ||
-        !Array.isArray(musicResult.data)
+        typeof musicResult.resultObject !== "object" ||
+        musicResult.resultObject === null ||
+        Array.isArray(musicResult.resultObject)
       ) {
-        console.error("[MUSIC_RESULT_FORMAT]", {
-          keys: Object.keys(musicResult),
-          resultObjectType: typeof musicResult.resultObject,
-          resultObjectKeys:
-            typeof musicResult.resultObject === "object" &&
-            musicResult.resultObject !== null &&
-            !Array.isArray(musicResult.resultObject)
-              ? Object.keys(musicResult.resultObject)
-              : [],
-          lyricsDataType:
-            typeof (
-              musicResult.resultObject as Record<string, unknown>
-            )?.lyricsData,
-          lyricsDataIsArray:
-            Array.isArray(
-              (
-                musicResult.resultObject as Record<string, unknown>
-              )?.lyricsData
-            ),
-          lyricsDataFirstItemKeys:
-            Array.isArray(
-              (
-                musicResult.resultObject as Record<string, unknown>
-              )?.lyricsData
-            )
-              ? Object.keys(
-                  (
-                    (
-                      musicResult.resultObject as Record<string, unknown>
-                    ).lyricsData as unknown[]
-                  )[0] ?? {}
-                )
-              : [],
-          code: musicResult.code,
-          taskIdMatches:
-            musicResult.task_id === order.kie_task_id,
-          dataIsArray: Array.isArray(musicResult.data),
-          resultUrlsIsArray: Array.isArray(musicResult.resultUrls),
-          resultUrlsCount: Array.isArray(musicResult.resultUrls)
-            ? musicResult.resultUrls.length
-            : null,
+        throw new Error("Objeto de resultado musical inválido.");
+      }
+
+      const resultObject = musicResult.resultObject as Record<
+        string,
+        unknown
+      >;
+
+      if (
+        resultObject.code !== 200 ||
+        resultObject.taskId !== order.kie_task_id ||
+        !Array.isArray(resultObject.lyricsData)
+      ) {
+        console.error("[MUSIC_RESULT_VALIDATION]", {
+          code: resultObject.code,
+          taskIdMatches: resultObject.taskId === order.kie_task_id,
+          lyricsDataIsArray: Array.isArray(resultObject.lyricsData),
         });
 
         throw new Error("Resultado incompatível com a tarefa.");
@@ -220,7 +196,7 @@ async function handlePOST(request: NextRequest) {
 
       let audioUrl: URL | null = null;
 
-      for (const item of musicResult.data) {
+      for (const item of resultObject.lyricsData) {
         if (
           typeof item !== "object" ||
           item === null ||
