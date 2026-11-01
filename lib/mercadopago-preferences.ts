@@ -23,11 +23,15 @@ export async function createMercadoPagoPreference(
   input: CreatePreferenceInput
 ): Promise<MercadoPagoPreference> {
   const token =
-    process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim();
+    process.env.PAYMENT_MODE === "mercadopago_prod"
+      ? process.env.MERCADOPAGO_ACCESS_TOKEN_PROD?.trim()
+      : process.env.PAYMENT_MODE === "mercadopago_test"
+        ? process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim()
+        : undefined;
 
   if (!token) {
     throw new Error(
-      "Credencial de teste do Mercado Pago não configurada."
+      "Credencial do Mercado Pago não configurada."
     );
   }
 
@@ -184,7 +188,11 @@ export async function recoverMercadoPagoPreference(
   storedPreferenceId?: string | null,
 ): Promise<{ id: string; checkoutUrl: string } | null> {
   const token =
-    process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim();
+    process.env.PAYMENT_MODE === "mercadopago_prod"
+      ? process.env.MERCADOPAGO_ACCESS_TOKEN_PROD?.trim()
+      : process.env.PAYMENT_MODE === "mercadopago_test"
+        ? process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim()
+        : undefined;
 
   if (!token) {
     throw new Error("Credencial Mercado Pago ausente.");

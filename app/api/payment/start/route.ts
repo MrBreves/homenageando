@@ -68,7 +68,8 @@ async function handlePOST(request: NextRequest) {
 
   if (
     paymentMode !== "test" &&
-    paymentMode !== "mercadopago_test"
+    paymentMode !== "mercadopago_test" &&
+    paymentMode !== "mercadopago_prod"
   ) {
     return fail(
       "Modo de pagamento não configurado.",
@@ -242,8 +243,8 @@ async function handlePOST(request: NextRequest) {
     }
 
     if (
-      paymentMode === "mercadopago_test" &&
-      currentOrder.payment_provider === "MERCADO_PAGO_TEST"
+      (paymentMode === "mercadopago_test" || paymentMode === "mercadopago_prod") &&
+      currentOrder.payment_provider === (paymentMode === "mercadopago_prod" ? "MERCADO_PAGO_PROD" : "MERCADO_PAGO_TEST")
     ) {
       const amount = currentOrder.payment_amount_cents;
 
@@ -280,7 +281,7 @@ async function handlePOST(request: NextRequest) {
               .eq("user_id", user.id)
               .eq("state", "AGUARDANDO_PAGAMENTO")
               .eq("payment_status", "PENDING")
-              .eq("payment_provider", "MERCADO_PAGO_TEST")
+              .eq("payment_provider", paymentMode === "mercadopago_prod" ? "MERCADO_PAGO_PROD" : "MERCADO_PAGO_TEST")
               .is("mercadopago_preference_id", null)
               .select("id")
               .maybeSingle();
@@ -314,7 +315,7 @@ async function handlePOST(request: NextRequest) {
         if (
           latestOrder.state !== "AGUARDANDO_PAGAMENTO" ||
           latestOrder.payment_status !== "PENDING" ||
-          latestOrder.payment_provider !== "MERCADO_PAGO_TEST" ||
+          latestOrder.payment_provider !== (paymentMode === "mercadopago_prod" ? "MERCADO_PAGO_PROD" : "MERCADO_PAGO_TEST") ||
           latestOrder.payment_amount_cents !== amount ||
           latestOrder.mercadopago_preference_id !== recovered.id
         ) {
@@ -364,7 +365,7 @@ async function handlePOST(request: NextRequest) {
   }
 
   if (
-    paymentMode === "mercadopago_test" &&
+    (paymentMode === "mercadopago_test" || paymentMode === "mercadopago_prod") &&
     !user.email
   ) {
     return fail(
@@ -379,7 +380,7 @@ async function handlePOST(request: NextRequest) {
   const webhookUrl =
     process.env.MERCADOPAGO_WEBHOOK_URL;
 
-  if (paymentMode === "mercadopago_test") {
+  if (paymentMode === "mercadopago_test" || paymentMode === "mercadopago_prod") {
     try {
       if (!publicBaseUrl || !webhookUrl) {
         throw new Error("URLs ausentes");
@@ -458,7 +459,9 @@ async function handlePOST(request: NextRequest) {
   const paymentProvider =
     paymentMode === "test"
       ? "TEST"
-      : "MERCADO_PAGO_TEST";
+      : paymentMode === "mercadopago_prod"
+        ? "MERCADO_PAGO_PROD"
+        : "MERCADO_PAGO_TEST";
 
   // O banco calcula o desconto e reserva
   // a utilização do cupom atomicamente.
@@ -618,7 +621,7 @@ async function handlePOST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("state", "AGUARDANDO_PAGAMENTO")
         .eq("payment_status", "PENDING")
-        .eq("payment_provider", "MERCADO_PAGO_TEST")
+        .eq("payment_provider", paymentMode === "mercadopago_prod" ? "MERCADO_PAGO_PROD" : "MERCADO_PAGO_TEST")
         .is("mercadopago_preference_id", null)
         .select("id")
         .maybeSingle();

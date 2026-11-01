@@ -1555,7 +1555,8 @@ if (questionnaireState === "PAGAMENTO") {
                 // Preparado para o fluxo Mercado Pago:
                 // só redireciona quando esse modo estiver ativo.
                 if (
-                  result.paymentMode === "mercadopago_test" &&
+                  (result.paymentMode === "mercadopago_test" ||
+                    result.paymentMode === "mercadopago_prod") &&
                   typeof result.checkoutUrl === "string" &&
                   result.checkoutUrl.startsWith("https://")
                 ) {

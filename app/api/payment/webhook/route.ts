@@ -96,7 +96,8 @@ function verifySignature(
 
 export async function POST(request: NextRequest) {
   // Mantém o webhook desativado no pagamento simbólico.
-  if (process.env.PAYMENT_MODE !== "mercadopago_test") {
+  const paymentMode = process.env.PAYMENT_MODE;
+  if (paymentMode !== "mercadopago_test" && paymentMode !== "mercadopago_prod") {
     return response(503, "Webhook não habilitado.");
   }
 
@@ -104,7 +105,11 @@ export async function POST(request: NextRequest) {
     process.env.MERCADOPAGO_WEBHOOK_SECRET?.trim();
 
   const accessToken =
-    process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim();
+    paymentMode === "mercadopago_prod"
+      ? process.env.MERCADOPAGO_ACCESS_TOKEN_PROD?.trim()
+      : process.env.MERCADOPAGO_ACCESS_TOKEN_TEST?.trim();
+
+  const expectedLiveMode = paymentMode === "mercadopago_prod";
 
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -177,7 +182,7 @@ export async function POST(request: NextRequest) {
     if (
       event.type !== "payment" ||
       String(data?.id ?? "") !== dataId ||
-      event.live_mode !== false
+      event.live_mode !== expectedLiveMode
     ) {
       return response(400, "Evento incompatível.");
     }
@@ -221,7 +226,7 @@ export async function POST(request: NextRequest) {
 
   if (
     String(payment.id ?? "") !== dataId ||
-    payment.live_mode !== false ||
+    payment.live_mode !== expectedLiveMode ||
     typeof payment.external_reference !== "string" ||
     !UUID.test(payment.external_reference) ||
     payment.currency_id !== "BRL" ||
