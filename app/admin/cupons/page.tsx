@@ -10,6 +10,7 @@ type Cupom = {
   code: string;
   discount_percent: number | null;
   discount_fixed_cents: number | null;
+  final_amount_cents: number | null;
   active: boolean;
   valid_from: string;
   expires_at: string | null;
@@ -31,7 +32,7 @@ export default function CuponsAdminPage() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [codigo, setCodigo] = useState("");
-  const [tipo, setTipo] = useState<"percent" | "fixed">("percent");
+  const [tipo, setTipo] = useState<"percent" | "fixed" | "final">("percent");
   const [valor, setValor] = useState("100");
   const [limite, setLimite] = useState("1");
   const [porUsuario, setPorUsuario] = useState("1");
@@ -69,7 +70,11 @@ export default function CuponsAdminPage() {
     const inteiro = Number(limite), limiteUsuario = Number(porUsuario);
     const numero = Number(valor.replace(",", "."));
     const cents = Math.round(numero * 100);
-    if (!codigo.trim() || !Number.isInteger(inteiro) || inteiro < 1 || !Number.isInteger(limiteUsuario) || limiteUsuario < 1 || limiteUsuario > inteiro || !Number.isFinite(numero) || numero <= 0 || (tipo === "percent" && (!Number.isInteger(numero) || numero > 100)) || (tipo === "fixed" && cents < 1) || !validade) {
+    if (tipo === "final" && (!Number.isFinite(numero) || numero <= 0)) {
+      setErro("O valor final deve ser maior que R$ 0,00. Para oferecer gratuitamente, selecione Percentual (%) e informe 100%.");
+      setSalvando(false); return;
+    }
+    if (!codigo.trim() || !Number.isInteger(inteiro) || inteiro < 1 || !Number.isInteger(limiteUsuario) || limiteUsuario < 1 || limiteUsuario > inteiro || !Number.isFinite(numero) || numero <= 0 || (tipo === "percent" && (!Number.isInteger(numero) || numero > 100)) || (tipo !== "percent" && (cents < 1 || cents > (tipo === "final" ? 3989 : 3990))) || !validade) {
       setErro("Confira código, desconto, limites e validade."); setSalvando(false); return;
     }
     try {
@@ -77,6 +82,7 @@ export default function CuponsAdminPage() {
         code: codigo.trim().toUpperCase(),
         discount_percent: tipo === "percent" ? numero : null,
         discount_fixed_cents: tipo === "fixed" ? cents : null,
+        final_amount_cents: tipo === "final" ? cents : null,
         max_redemptions: inteiro,
         per_user_limit: limiteUsuario,
         valid_from: inicio ? new Date(`${inicio}T00:00:00`).toISOString() : new Date().toISOString(),
@@ -112,9 +118,10 @@ export default function CuponsAdminPage() {
           <section className={styles.card}>
             <h2>Criar cupom</h2><p className={styles.note}>Novos cupons começam ativos. O desconto será limitado ao valor da compra.</p>
             <form className={styles.form} onSubmit={criar}>
-              <label className={styles.field}>Código<input className={styles.input} value={codigo} onChange={e=>setCodigo(e.target.value.toUpperCase())} placeholder="EXEMPLO100" maxLength={64} required /></label>
-              <label className={styles.field}>Modalidade<select className={styles.select} value={tipo} onChange={e=>{setTipo(e.target.value as "percent" | "fixed");setValor("");}}><option value="percent">Percentual (%)</option><option value="fixed">Valor fixo (R$)</option></select></label>
-              <label className={styles.field}>{tipo === "percent" ? "Desconto (%)" : "Desconto (R$)"}<input className={styles.input} type="text" inputMode="decimal" value={valor} onChange={e=>setValor(e.target.value)} placeholder={tipo === "percent" ? "100" : "10,00"} required /></label>
+              <label className={styles.field}>Código<input className={styles.input} value={codigo} onChange={e=>setCodigo(e.target.value.toUpperCase())} placeholder="EXEMPLO100" maxLength={40} required /></label>
+              <label className={styles.field}>Modalidade<select className={styles.select} value={tipo} onChange={e=>{setTipo(e.target.value as "percent" | "fixed" | "final");setValor("");}}><option value="percent">Percentual (%)</option><option value="fixed">Desconto fixo (R$)</option><option value="final">Valor final a pagar (R$)</option></select></label>
+              <label className={styles.field}>{tipo === "percent" ? "Desconto (%)" : tipo === "final" ? "Valor final a pagar (R$)" : "Desconto (R$)"}<input className={styles.input} type="text" inputMode="decimal" value={valor} onChange={e=>setValor(e.target.value)} placeholder={tipo === "percent" ? "100" : tipo === "final" ? "1,00" : "10,00"} required /></label>
+              {tipo === "final" && <p className={styles.note}>O valor deve ser maior que R$ 0,00 e menor que o valor da compra. Para cortesia, use Percentual (%) com 100%.</p>}
               <div className={styles.row}><label className={styles.field}>Usos máximos<input className={styles.input} type="number" min="1" max="100000" value={limite} onChange={e=>setLimite(e.target.value)} required /></label><label className={styles.field}>Por cliente<input className={styles.input} type="number" min="1" value={porUsuario} onChange={e=>setPorUsuario(e.target.value)} required /></label></div>
               <label className={styles.field}>Início (opcional)<input className={styles.input} type="date" value={inicio} onChange={e=>setInicio(e.target.value)} /></label>
               <label className={styles.field}>Válido até<input className={styles.input} type="date" value={validade} onChange={e=>setValidade(e.target.value)} required /></label>
@@ -127,7 +134,7 @@ export default function CuponsAdminPage() {
               <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Cupom</th><th>Desconto</th><th>Utilizações</th><th>Validade</th><th>Estado</th><th>Ação</th></tr></thead><tbody>
                 {cupons.map(c=><tr key={c.id}>
                   <td>{c.code}<div className={styles.muted}>{c.orders.length ? c.orders.map(o=>`OS ${o.os_number ?? "—"} (${o.status})`).join(", ") : "Nenhuma OS vinculada"}</div></td>
-                  <td>{c.discount_percent != null ? `${c.discount_percent}%` : dinheiro(c.discount_fixed_cents ?? 0)}</td>
+                  <td>{c.discount_percent != null ? `${c.discount_percent}%` : c.final_amount_cents != null ? `Pagar ${dinheiro(c.final_amount_cents)}` : `Desconto ${dinheiro(c.discount_fixed_cents ?? 0)}`}</td>
                   <td>{c.used_count} / {c.max_redemptions}<div className={styles.muted}>{c.reserved_count} reservados</div></td>
                   <td>{data(c.expires_at)}</td>
                   <td><span className={`${styles.badge} ${c.active ? styles.statusActive : styles.statusInactive}`}>{c.active ? "Ativo" : "Inativo"}</span></td>

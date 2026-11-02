@@ -52,15 +52,19 @@ async function execute(request: NextRequest, action: CouponAction) {
       const code = typeof payload.code === "string" ? payload.code.trim().toUpperCase() : "";
       const percent = payload.discount_percent;
       const fixed = payload.discount_fixed_cents;
-      const hasPercent = percent !== null && percent !== undefined;
-      const hasFixed = fixed !== null && fixed !== undefined;
-      if (
-        !/^[A-Z0-9_-]{4,40}$/.test(code) ||
-        hasPercent === hasFixed ||
-        (hasPercent && (!Number.isInteger(percent) || Number(percent) < 1 || Number(percent) > 100)) ||
-        (hasFixed && (!Number.isInteger(fixed) || Number(fixed) < 1 || Number(fixed) > 3990))
-      ) {
+      const hasPercent = payload.discount_percent !== null && payload.discount_percent !== undefined;
+      const hasFixed = payload.discount_fixed_cents !== null && payload.discount_fixed_cents !== undefined;
+      const hasFinal = payload.final_amount_cents !== null && payload.final_amount_cents !== undefined;
+      const kinds = Number(hasPercent) + Number(hasFixed) + Number(hasFinal);
+      if (!/^[A-Z0-9_-]{4,40}$/.test(code) || kinds !== 1 ||
+          (hasPercent && (!Number.isInteger(payload.discount_percent) || Number(payload.discount_percent) < 1 || Number(payload.discount_percent) > 100)) ||
+          (hasFixed && (!Number.isInteger(payload.discount_fixed_cents) || Number(payload.discount_fixed_cents) < 1 || Number(payload.discount_fixed_cents) > 3990))) {
         return respond({ success: false, error: "Código ou modalidade de desconto inválidos." }, 400);
+      }
+      if (hasFinal && (!Number.isInteger(payload.final_amount_cents) || Number(payload.final_amount_cents) <= 0 || Number(payload.final_amount_cents) >= 3990)) {
+        return respond({ success: false, error: Number(payload.final_amount_cents) === 0
+          ? "O valor final deve ser maior que R$ 0,00. Para oferecer gratuitamente, selecione Percentual (%) e informe 100%."
+          : "O valor final deve ser maior que zero e menor que o valor da compra." }, 400);
       }
       payload.code = code;
       if (!Number.isInteger(payload.max_redemptions) || (payload.max_redemptions as number) < 1 || (payload.max_redemptions as number) > 100000) {
