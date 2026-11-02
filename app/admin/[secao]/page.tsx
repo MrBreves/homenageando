@@ -29,6 +29,13 @@ type Pedido = {
   music_1_storage_path: string | null;
   preview_1_storage_path: string | null;
   abandonada: boolean;
+  admin_grant: {
+    order_id: string;
+    grant_mode: "KEEP_CHARGE" | "WAIVE_BALANCE";
+    granted_at: string;
+    original_due_cents: number;
+    waived_cents: number;
+  } | null;
 };
 
 type Resposta = {
@@ -67,6 +74,14 @@ function data(valor: string | null | undefined) {
 }
 
 function status(p: Pedido) {
+  if (p.admin_grant?.grant_mode === "WAIVE_BALANCE") {
+    return "Liberada - cobrança dispensada";
+  }
+
+  if (p.admin_grant?.grant_mode === "KEEP_CHARGE") {
+    return "Liberada - cobrança mantida";
+  }
+
   if (p.abandonada) return "Abandonada";
   if (p.state === "QUESTIONÁRIO_ABERTO") return "Em elaboração";
   if (p.state === "GERANDO_MUSICA_1") return "Em geração";
@@ -91,6 +106,8 @@ export default function SecaoAdminPage() {
   const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
   const [filtro, setFiltro] = useState("todos");
+  const [operandoId, setOperandoId] = useState<string | null>(null);
+  const [recarregar, setRecarregar] = useState(0);
 
   useEffect(() => {
     let cancelado = false;
@@ -143,7 +160,109 @@ export default function SecaoAdminPage() {
       cancelado = true;
       window.clearTimeout(timer);
     };
-  }, []);
+  }, [recarregar]);
+
+  async function liberarMusica(
+    pedido: Pedido,
+    modalidade: "KEEP_CHARGE" | "WAIVE_BALANCE",
+  ) {
+    if (operandoId) return;
+
+    const nomeModalidade =
+      modalidade === "WAIVE_BALANCE"
+        ? "LIBERAR E ZERAR A COBRANÇA"
+        : "LIBERAR MANTENDO A COBRANÇA";
+
+    const motivo = window.prompt(
+      `OS ${pedido.os_number ?? "—"} - ${nomeModalidade}\n\nInforme a justificativa administrativa:`,
+    );
+
+    if (motivo === null) return;
+
+    const justificativa = motivo.trim();
+
+    if (!justificativa || justificativa.length > 500) {
+      window.alert(
+        "Informe uma justificativa de 1 a 500 caracteres.",
+      );
+      return;
+    }
+
+    const valor = moeda(pedido.payment_amount_cents);
+
+    const detalhe =
+      modalidade === "WAIVE_BALANCE"
+        ? `O saldo informado na OS (${valor}) será dispensado. Não será registrado pagamento recebido.`
+        : `A música será disponibilizada, mas o saldo informado na OS (${valor}) continuará devido.`;
+
+    const confirmado = window.confirm(
+      `CONFIRMAR OPERAÇÃO ADMINISTRATIVA\n\n` +
+      `OS: ${pedido.os_number ?? "—"}\n` +
+      `Música: ${pedido.titulo ?? "Título não cadastrado"}\n` +
+      `Operação: ${nomeModalidade}\n\n` +
+      `${detalhe}\n\n` +
+      `Justificativa: ${justificativa}\n\n` +
+      `Deseja executar esta operação?`,
+    );
+
+    if (!confirmado) return;
+
+    setOperandoId(pedido.id);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Sessão expirada. Entre novamente.");
+      }
+
+      const resposta = await fetch("/api/admin/music-grant", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: pedido.id,
+          mode: modalidade,
+          reason: justificativa,
+        }),
+        cache: "no-store",
+      });
+
+      const resultado: {
+        success?: boolean;
+        error?: string;
+        effectiveDueCents?: number;
+      } = await resposta.json();
+
+      if (!resposta.ok || resultado.success !== true) {
+        throw new Error(
+          resultado.error ?? "Operação administrativa recusada.",
+        );
+      }
+
+      window.alert(
+        `Operação registrada com sucesso.\n\n` +
+        `OS ${pedido.os_number ?? "—"}\n` +
+        `Saldo devido após a operação: ${moeda(resultado.effectiveDueCents)}`,
+      );
+
+      setCarregando(true);
+      setErro("");
+      setRecarregar((anterior) => anterior + 1);
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Erro ao registrar liberação administrativa.",
+      );
+    } finally {
+      setOperandoId(null);
+    }
+  }
 
   if (!titulos[secao]) {
     return (
@@ -376,6 +495,9 @@ export default function SecaoAdminPage() {
                           <th>Última atividade</th>
                           <th>Valor</th>
                           <th>Cupom / Desconto</th>
+                          {(secao === "pedidos" || secao === "musicas") && (
+                            <th>Liberação administrativa</th>
+                          )}
                         </tr>
                       </thead>
                       <tbody>
@@ -417,6 +539,86 @@ export default function SecaoAdminPage() {
                                     </div>
                                   )}
                               </td>
+
+                              {(secao === "pedidos" || secao === "musicas") && (
+                                <td>
+                                  {p.admin_grant ? (
+                                    <div>
+                                      <strong>
+                                        {p.admin_grant.grant_mode === "WAIVE_BALANCE"
+                                          ? "Cobrança dispensada"
+                                          : "Cobrança mantida"}
+                                      </strong>
+                                      <div>
+                                        {`Registrado em ${data(p.admin_grant.granted_at)}`}
+                                      </div>
+                                      <div>
+                                        {`Valor dispensado: ${moeda(p.admin_grant.waived_cents)}`}
+                                      </div>
+                                      <div>
+                                        {`Saldo devido: ${moeda(
+                                          p.admin_grant.original_due_cents -
+                                          p.admin_grant.waived_cents
+                                        )}`}
+                                      </div>
+                                    </div>
+                                  ) : p.payment_status === "APPROVED" ? (
+                                    <span>Pagamento já aprovado</span>
+                                  ) : p.music_1_storage_path &&
+                                    p.payment_status === "PENDING" ? (
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: 8,
+                                        minWidth: 190,
+                                      }}
+                                    >
+                                      <button
+                                        type="button"
+                                        disabled={operandoId !== null}
+                                        onClick={() =>
+                                          void liberarMusica(p, "KEEP_CHARGE")
+                                        }
+                                        style={{
+                                          padding: "9px 12px",
+                                          cursor: "pointer",
+                                          borderRadius: 8,
+                                          border: "1px solid #777",
+                                          background: "#fff",
+                                          color: "#222",
+                                        }}
+                                      >
+                                        {operandoId === p.id
+                                          ? "Processando..."
+                                          : "Liberar mantendo cobrança"}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        disabled={operandoId !== null}
+                                        onClick={() =>
+                                          void liberarMusica(p, "WAIVE_BALANCE")
+                                        }
+                                        style={{
+                                          padding: "9px 12px",
+                                          cursor: "pointer",
+                                          borderRadius: 8,
+                                          border: "1px solid #976c38",
+                                          background: "#f7eddc",
+                                          color: "#362719",
+                                        }}
+                                      >
+                                        {operandoId === p.id
+                                          ? "Processando..."
+                                          : "Liberar e zerar cobrança"}
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <span>Indisponível</span>
+                                  )}
+                                </td>
+                              )}
                             </tr>
                           )
                         )}

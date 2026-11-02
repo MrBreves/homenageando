@@ -224,6 +224,48 @@ async function handlePOST(request: NextRequest) {
     return fail("Pedido não encontrado.", 404);
   }
 
+  // Verificacao da dispensa administrativa antes de
+  // qualquer tentativa de iniciar ou reutilizar cobranca.
+  //
+  // A consulta utiliza o cliente Supabase de servidor.
+  // Nenhuma informacao financeira e alterada aqui.
+
+  const {
+    data: balanceWaived,
+    error: balanceWaiverError,
+  } = await supabase.rpc(
+    "admin_waiver_exists",
+    {
+      p_order_id: currentOrder.id,
+    }
+  );
+
+  if (balanceWaiverError) {
+    console.error(
+      "Erro ao verificar dispensa administrativa:",
+      balanceWaiverError
+    );
+
+    return fail(
+      "Nao foi possivel verificar a situacao financeira desta OS.",
+      503
+    );
+  }
+
+  if (balanceWaived === true) {
+    return fail(
+      "A cobranca desta OS foi dispensada administrativamente. Nenhum novo pagamento e necessario.",
+      409
+    );
+  }
+
+  if (balanceWaived !== false) {
+    return fail(
+      "Resposta invalida ao verificar a situacao financeira da OS.",
+      503
+    );
+  }
+
   if (
     currentOrder.state === "AGUARDANDO_PAGAMENTO" &&
     currentOrder.payment_status === "PENDING"

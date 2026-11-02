@@ -739,6 +739,9 @@ function MusicActions({
 
 export default function MinhasMusicasPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [adminGrants, setAdminGrants] = useState<
+    Record<string, "KEEP_CHARGE" | "WAIVE_BALANCE">
+  >({});
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -751,12 +754,53 @@ export default function MinhasMusicasPage() {
       setLoading(true);
       setError(null);
       setOrders([]);
+      setAdminGrants({});
 
       try {
         const data = await getUserOrders(page);
 
+        const {
+          data: grantsData,
+          error: grantsError,
+        } = await supabase.rpc(
+          "my_homenageando_admin_music_grants",
+        );
+
+        if (grantsError) {
+          throw new Error(
+            "Falha ao consultar liberacoes administrativas.",
+          );
+        }
+
+        if (!Array.isArray(grantsData)) {
+          throw new Error(
+            "Resposta invalida das liberacoes administrativas.",
+          );
+        }
+
+        const grantsMap: Record<
+          string,
+          "KEEP_CHARGE" | "WAIVE_BALANCE"
+        > = {};
+
+        for (const grant of grantsData as Array<{
+          order_id: string;
+          grant_mode: string;
+        }>) {
+          if (
+            typeof grant.order_id === "string" &&
+            (
+              grant.grant_mode === "KEEP_CHARGE" ||
+              grant.grant_mode === "WAIVE_BALANCE"
+            )
+          ) {
+            grantsMap[grant.order_id] = grant.grant_mode;
+          }
+        }
+
         if (active) {
           setOrders(data);
+          setAdminGrants(grantsMap);
         }
       } catch {
         if (active) {
@@ -883,6 +927,21 @@ export default function MinhasMusicasPage() {
                   order.music_title ??
                   "Título definitivo ainda não cadastrado";
 
+                const adminGrantMode = adminGrants[order.id] ?? null;
+
+                const hasAdminGrant =
+                  adminGrantMode === "KEEP_CHARGE" ||
+                  adminGrantMode === "WAIVE_BALANCE";
+
+                const canAccessMusic =
+                  order.state === "MUSICA_1_DISPONIVEL" ||
+                  order.state === "PAGAMENTO_CONFIRMADO" ||
+                  hasAdminGrant;
+
+                const canContinuePayment =
+                  order.state === "AGUARDANDO_PAGAMENTO" &&
+                  adminGrantMode !== "WAIVE_BALANCE";
+
                 return (
                   <li key={order.id}>
                     <article
@@ -920,8 +979,24 @@ export default function MinhasMusicasPage() {
                           lineHeight: 1.4,
                         }}
                       >
-                        {STATUS_LABELS[order.state] ?? "Situação indisponível"}
+                        {hasAdminGrant
+                          ? "Música liberada administrativamente"
+                          : STATUS_LABELS[order.state] ?? "Situação indisponível"}
                       </p>
+
+                      {hasAdminGrant && (
+                        <p
+                          style={{
+                            margin: "0 0 12px",
+                            color: "#65564d",
+                            fontSize: 14,
+                          }}
+                        >
+                          {adminGrantMode === "WAIVE_BALANCE"
+                            ? "Cobrança dispensada administrativamente."
+                            : "Música liberada. A cobrança permanece pendente."}
+                        </p>
+                      )}
 
                       <p
                         style={{
@@ -945,16 +1020,15 @@ export default function MinhasMusicasPage() {
                         </p>
                       )}
 
-                                            {(order.state === "MUSICA_1_DISPONIVEL" ||
-                        order.state === "PAGAMENTO_CONFIRMADO") && (
+                      {canAccessMusic && (
                         <MusicActions
                           orderId={order.id}
                           musicTitle={musicTitle}
                         />
                       )}
 
-                                            {(order.state === "QUESTIONÁRIO_ABERTO" ||
-                        order.state === "AGUARDANDO_PAGAMENTO") && (
+                      {(order.state === "QUESTIONÁRIO_ABERTO" ||
+                        canContinuePayment) && (
                         <div style={{ marginTop: 16 }}>
                           <Link
                             href="/criar"

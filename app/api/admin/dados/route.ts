@@ -187,6 +187,28 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const { data: grantsData, error: grantsError } =
+      await db.rpc("get_homenageando_admin_music_grants");
+
+    if (grantsError || !Array.isArray(grantsData)) {
+      console.error("Admin - concessoes:", grantsError);
+      return falha("Erro ao consultar liberacoes administrativas.", 503);
+    }
+
+    type AdminGrant = {
+      order_id: string;
+      grant_mode: "KEEP_CHARGE" | "WAIVE_BALANCE";
+      granted_at: string;
+      original_due_cents: number;
+      waived_cents: number;
+    };
+
+    const grants = new Map<string, AdminGrant>();
+
+    for (const item of grantsData as AdminGrant[]) {
+      grants.set(item.order_id, item);
+    }
+
     const resultado = registros.map((pedido) => {
       const questionario = pedido.questionnaire ?? {};
       const cadastro = usuarios.get(pedido.user_id);
@@ -210,6 +232,7 @@ export async function GET(request: NextRequest) {
       return {
         ...pedido,
         titulo,
+        admin_grant: grants.get(pedido.id) ?? null,
         cliente_nome:
           cadastro?.nome || nomeQuestionario || "Nome não informado",
         cliente_email: cadastro?.email ?? null,

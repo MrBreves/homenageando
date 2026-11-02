@@ -261,6 +261,83 @@ export async function POST(request: NextRequest) {
     },
   );
 
+  const paymentOrderId = payment.external_reference;
+
+  // Registra pagamentos reais recebidos para OS com
+  // dispensa administrativa. Nao confirma receita,
+  // altera cobranca ou executa estorno automatico.
+  const recordIfWaived = async (): Promise<
+    "recorded" | "not-waived" | "error"
+  > => {
+    const {
+      data: waived,
+      error: waiverError,
+    } = await supabase.rpc(
+      "admin_waiver_exists",
+      { p_order_id: paymentOrderId },
+    );
+
+    if (waiverError || typeof waived !== "boolean") {
+      console.error(
+        "[MP webhook] Falha ao verificar cortesia:",
+        waiverError,
+      );
+      return "error";
+    }
+
+    if (!waived) {
+      return "not-waived";
+    }
+
+    const {
+      data: recorded,
+      error: recordError,
+    } = await supabase.rpc(
+      "record_homenageando_waiver_payment_conflict",
+      {
+        p_order_id: paymentOrderId,
+        p_payment_id: dataId,
+        p_amount_cents: amountCents,
+        p_live_mode: expectedLiveMode,
+      },
+    );
+
+    if (recordError || recorded !== true) {
+      console.error(
+        "[MP webhook] Falha na conciliacao de pagamento:",
+        recordError,
+      );
+      return "error";
+    }
+
+    console.error(
+      "[MP webhook] CONCILIACAO PENDENTE:",
+      "pagamento",
+      dataId,
+      "OS",
+      paymentOrderId,
+    );
+
+    return "recorded";
+  };
+
+  // Primeira verificacao: antes da confirmacao normal.
+  const waiverBeforeConfirmation = await recordIfWaived();
+
+  if (waiverBeforeConfirmation === "recorded") {
+    return response(
+      200,
+      "Pagamento registrado para conciliacao administrativa.",
+    );
+  }
+
+  if (waiverBeforeConfirmation === "error") {
+    return response(
+      503,
+      "Verificacao financeira indisponivel.",
+    );
+  }
+
   // A transação do banco verifica pedido, provedor,
   // valor e reserva do cupom antes de liberar a música.
   const { data, error } = await supabase.rpc(
@@ -283,6 +360,26 @@ export async function POST(request: NextRequest) {
   }
 
   if (!data?.success) {
+    // Segunda verificacao: a cortesia pode ter sido
+    // registrada entre a consulta e a transacao de
+    // confirmacao do pagamento.
+
+    const waiverAfterConfirmation = await recordIfWaived();
+
+    if (waiverAfterConfirmation === "recorded") {
+      return response(
+        200,
+        "Pagamento registrado para conciliacao administrativa.",
+      );
+    }
+
+    if (waiverAfterConfirmation === "error") {
+      return response(
+        503,
+        "Verificacao financeira indisponivel.",
+      );
+    }
+
     console.error(
       "[MP webhook] Pagamento recusado pelo controle do pedido.",
     );

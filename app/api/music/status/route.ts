@@ -401,10 +401,9 @@ async function handleGET(request: NextRequest) {
 
     const { data: order, error } = await adminClient
       .from("orders")
-      .select("lyrics_1, music_1_storage_path")
+      .select("lyrics_1, music_1_storage_path, payment_status")
       .eq("id", orderId)
       .eq("user_id", user.id)
-      .eq("payment_status", "APPROVED")
       .maybeSingle();
 
     if (error) {
@@ -416,6 +415,46 @@ async function handleGET(request: NextRequest) {
         { error: "Letra não disponível para esta solicitação." },
         404,
       );
+    }
+
+    // A OS deve pertencer ao usuario autenticado.
+    // Acesso permitido quando existe:
+    // - pagamento aprovado; OU
+    // - concessao administrativa registrada.
+
+    if (order.payment_status !== "APPROVED") {
+      const {
+        data: hasAdminGrant,
+        error: grantError,
+      } = await adminClient.rpc(
+        "has_homenageando_admin_music_grant",
+        {
+          p_order_id: orderId,
+        },
+      );
+
+      if (grantError) {
+        console.error(
+          "Falha ao consultar liberacao administrativa:",
+          grantError,
+        );
+
+        return json(
+          {
+            error: "Nao foi possivel verificar a autorizacao da musica.",
+          },
+          503,
+        );
+      }
+
+      if (hasAdminGrant !== true) {
+        return json(
+          {
+            error: "Musica indisponivel para esta solicitacao.",
+          },
+          404,
+        );
+      }
     }
 
     const asset = request.nextUrl.searchParams.get("asset") ?? "lyrics";
