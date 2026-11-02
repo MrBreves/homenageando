@@ -25,6 +25,21 @@ type Resposta = { success: boolean; error?: string; coupons?: Cupom[] };
 const dinheiro = (n: number) => (n / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const data = (s: string | null) => s ? new Date(s).toLocaleDateString("pt-BR") : "Sem prazo";
 
+function gerarCodigoCupom(): string {
+  const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(12);
+
+  window.crypto.getRandomValues(bytes);
+
+  let codigo = "HOM-";
+
+  for (const byte of bytes) {
+    codigo += caracteres[byte % caracteres.length];
+  }
+
+  return codigo;
+}
+
 export default function CuponsAdminPage() {
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -64,6 +79,10 @@ export default function CuponsAdminPage() {
 
   useEffect(() => { void carregar(); }, [carregar]);
 
+  useEffect(() => {
+    setCodigo(gerarCodigoCupom());
+  }, []);
+
   async function criar(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSalvando(true); setErro(""); setSucesso("");
@@ -88,7 +107,7 @@ export default function CuponsAdminPage() {
         valid_from: inicio ? new Date(`${inicio}T00:00:00`).toISOString() : new Date().toISOString(),
         expires_at: new Date(`${validade}T23:59:59`).toISOString(),
       });
-      setSucesso("Cupom criado."); setCodigo(""); await carregar();
+      setSucesso("Cupom criado."); setCodigo(gerarCodigoCupom()); await carregar();
     } catch (e) { setErro(e instanceof Error ? e.message : "Não foi possível criar o cupom."); }
     finally { setSalvando(false); }
   }
@@ -118,7 +137,24 @@ export default function CuponsAdminPage() {
           <section className={styles.card}>
             <h2>Criar cupom</h2><p className={styles.note}>Novos cupons começam ativos. O desconto será limitado ao valor da compra.</p>
             <form className={styles.form} onSubmit={criar}>
-              <label className={styles.field}>Código<input className={styles.input} value={codigo} onChange={e=>setCodigo(e.target.value.toUpperCase())} placeholder="EXEMPLO100" maxLength={40} required /></label>
+              <label className={styles.field}>
+  Código (gerado automaticamente)
+  <input
+    className={styles.input}
+    value={codigo}
+    readOnly
+    required
+    aria-label="Codigo do cupom gerado automaticamente"
+  />
+</label>
+<button
+  type="button"
+  className={styles.secondary}
+  onClick={() => setCodigo(gerarCodigoCupom())}
+  disabled={salvando}
+>
+  Gerar outro código
+</button>
               <label className={styles.field}>Modalidade<select className={styles.select} value={tipo} onChange={e=>{setTipo(e.target.value as "percent" | "fixed" | "final");setValor("");}}><option value="percent">Percentual (%)</option><option value="fixed">Desconto fixo (R$)</option><option value="final">Valor final a pagar (R$)</option></select></label>
               <label className={styles.field}>{tipo === "percent" ? "Desconto (%)" : tipo === "final" ? "Valor final a pagar (R$)" : "Desconto (R$)"}<input className={styles.input} type="text" inputMode="decimal" value={valor} onChange={e=>setValor(e.target.value)} placeholder={tipo === "percent" ? "100" : tipo === "final" ? "1,00" : "10,00"} required /></label>
               {tipo === "final" && <p className={styles.note}>O valor deve ser maior que R$ 0,00 e menor que o valor da compra. Para cortesia, use Percentual (%) com 100%.</p>}
