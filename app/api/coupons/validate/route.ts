@@ -25,9 +25,10 @@ type CouponValidationResult = {
   valid: boolean;
   error?: string;
   code?: string;
-  discountType?: "PERCENT" | "FIXED";
+  discountType?: "PERCENT" | "FIXED" | "FINAL";
   discountPercent?: number | null;
   discountFixedCents?: number | null;
+  finalAmountCents?: number | null;
   originalAmountCents?: number;
   discountAmountCents?: number;
   totalAmountCents?: number;
@@ -314,6 +315,7 @@ async function handlePOST(request: NextRequest) {
     const discountType = result.discountType;
     const discountPercent = result.discountPercent;
     const discountFixedCents = result.discountFixedCents;
+    const finalAmountCents = result.finalAmountCents;
 
     const originalAmountCents =
       result.originalAmountCents;
@@ -340,17 +342,28 @@ async function handlePOST(request: NextRequest) {
       discountFixedCents <= 3990 &&
       discountPercent == null;
 
+    const finalValid =
+      discountType === "FINAL" &&
+      Number.isInteger(finalAmountCents) &&
+      typeof finalAmountCents === "number" &&
+      finalAmountCents >= 1 &&
+      finalAmountCents < 3990 &&
+      discountPercent == null &&
+      discountFixedCents == null;
+
     const expectedDiscount =
       percentValid && typeof discountPercent === "number"
         ? Math.floor((3990 * discountPercent + 50) / 100)
         : fixedValid && typeof discountFixedCents === "number"
           ? discountFixedCents
-          : null;
+          : finalValid && typeof finalAmountCents === "number"
+            ? 3990 - finalAmountCents
+            : null;
 
     if (
       typeof result.code !== "string" ||
       !COUPON_REGEX.test(result.code) ||
-      (!percentValid && !fixedValid) ||
+      (!percentValid && !fixedValid && !finalValid) ||
       !Number.isInteger(originalAmountCents) ||
       !Number.isInteger(discountAmountCents) ||
       !Number.isInteger(totalAmountCents) ||
@@ -374,9 +387,9 @@ async function handlePOST(request: NextRequest) {
       valid: true,
       coupon: {
         code: result.code,
-        discountType,
+        discountType: finalValid ? "FIXED" : discountType,
         discountPercent: percentValid ? discountPercent : null,
-        discountFixedCents: fixedValid ? discountFixedCents : null,
+        discountFixedCents: fixedValid || finalValid ? expectedDiscount : null,
       },
       pricing: {
         currency: "BRL",

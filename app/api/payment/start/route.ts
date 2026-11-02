@@ -237,27 +237,137 @@ async function handlePOST(request: NextRequest) {
         return fail("Existe uma transação registrada para este pedido. Consulte o suporte antes de alterar o desconto.", 409);
       }
 
-      // Troca atômica apenas para cortesia integral. Não reutiliza preferência paga.
-      const { data: freeSwap, error: freeSwapError } = await supabase.rpc(
-        "complete_homenageando_pending_with_free_coupon",
-        { p_order_id: orderId, p_user_id: user.id, p_coupon_code: couponCode },
+      const provedorSolicitado =
+        paymentMode === "test"
+          ? "TEST"
+          : paymentMode === "mercadopago_prod"
+            ? "MERCADO_PAGO_PROD"
+            : "MERCADO_PAGO_TEST";
+
+      if (currentOrder.payment_provider !== provedorSolicitado) {
+        return fail("Modo de pagamento diferente do pedido existente.", 409);
+      }
+
+      const { data: swapData, error: swapError } = await supabase.rpc(
+        "replace_homenageando_pending_coupon",
+        {
+          p_order_id: orderId,
+          p_user_id: user.id,
+          p_coupon_code: couponCode,
+        },
       );
-      if (freeSwapError) {
-        console.error("Falha na substituição de cupom integral:", freeSwapError);
-        return fail("Não foi possível concluir a troca do cupom com segurança.", 503);
+
+      if (swapError) {
+        console.error("Falha ao substituir cupom:", swapError);
+        return fail("Não foi possível atualizar o cupom.", 503);
       }
-      if (!freeSwap?.success) {
-        return fail(freeSwap?.error ?? "Cupom indisponível para substituir o desconto atual.", 409);
+
+      if (!swapData?.success) {
+        return fail(
+          swapData?.error ?? "Cupom indisponível para este pedido.",
+          409,
+        );
       }
-      return NextResponse.json({
-        success: true,
-        paymentMode: "coupon",
-        state: freeSwap.state,
-        paymentStatus: freeSwap.paymentStatus,
-        totalAmountCents: 0,
-        discountAmountCents: 3990,
-        couponCode: freeSwap.couponCode,
-      }, { headers: { "Cache-Control": "no-store" } });
+
+      const novoTotal = swapData.totalAmountCents;
+
+      if (
+        !Number.isInteger(novoTotal) ||
+        novoTotal < 0 ||
+        novoTotal > 3990
+      ) {
+        return fail("Valor atualizado inconsistente.", 503);
+      }
+
+      if (novoTotal === 0) {
+        return NextResponse.json({
+          success: true,
+          paymentMode: "coupon",
+          state: swapData.state,
+          paymentStatus: swapData.paymentStatus,
+          totalAmountCents: 0,
+          discountAmountCents: swapData.discountAmountCents,
+          couponCode: swapData.couponCode,
+        }, { headers: { "Cache-Control": "no-store" } });
+      }
+
+      if (paymentMode === "test") {
+        return NextResponse.json({
+          success: true,
+          paymentMode,
+          state: swapData.state,
+          paymentStatus: swapData.paymentStatus,
+          totalAmountCents: novoTotal,
+          discountAmountCents: swapData.discountAmountCents,
+          couponCode: swapData.couponCode,
+        }, { headers: { "Cache-Control": "no-store" } });
+      }
+
+      try {
+        const publicBaseUrlNovo =
+          process.env.MERCADOPAGO_PUBLIC_BASE_URL;
+
+        const webhookUrlNovo =
+          process.env.MERCADOPAGO_WEBHOOK_URL;
+
+        if (
+          !publicBaseUrlNovo ||
+          !webhookUrlNovo ||
+          new URL(publicBaseUrlNovo).protocol !== "https:" ||
+          new URL(webhookUrlNovo).protocol !== "https:"
+        ) {
+          return fail("URLs de pagamento não configuradas.", 503);
+        }
+
+        const preference = await createMercadoPagoPreference({
+          orderId,
+          orderNumber: swapData.orderNumber,
+          buyerEmail: user.email!,
+          baseUrl: publicBaseUrlNovo,
+          notificationUrl: webhookUrlNovo,
+          totalAmountCents: novoTotal,
+        });
+
+        const { data: saved, error: saveError } = await supabase
+          .from("orders")
+          .update({
+            mercadopago_preference_id: preference.id,
+          })
+          .eq("id", orderId)
+          .eq("user_id", user.id)
+          .eq("state", "AGUARDANDO_PAGAMENTO")
+          .eq("payment_status", "PENDING")
+          .eq("payment_amount_cents", novoTotal)
+          .is("mercadopago_preference_id", null)
+          .select("id")
+          .maybeSingle();
+
+        if (saveError || !saved) {
+          return fail(
+            "A preferência foi criada, mas não pôde ser registrada.",
+            503,
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          paymentMode,
+          state: swapData.state,
+          paymentStatus: swapData.paymentStatus,
+          totalAmountCents: novoTotal,
+          discountAmountCents: swapData.discountAmountCents,
+          couponCode: swapData.couponCode,
+          preferenceId: preference.id,
+          checkoutUrl: preference.init_point,
+        }, { headers: { "Cache-Control": "no-store" } });
+      } catch (error) {
+        console.error("Falha ao criar preferência atualizada:", error);
+
+        return fail(
+          "Não foi possível preparar a cobrança atualizada.",
+          503,
+        );
+      }
     }
     if (
       paymentMode === "test" &&
