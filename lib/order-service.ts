@@ -1,4 +1,4 @@
-﻿import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import type { QuestionnaireAnswers } from "@/types/questionnaire";
 import type { OrderState } from "@/types/order-state";
 
@@ -10,6 +10,7 @@ export type Order = {
   order_created_at: string | null;
   state: OrderState;
   questionnaire: QuestionnaireAnswers;
+  music_title: string | null;
   current_step: number;
   created_at: string;
   updated_at: string;
@@ -40,7 +41,7 @@ export async function getCurrentUserOrder(): Promise<Order | null> {
     const { data, error } = await supabase
       .from("orders")
       .select(
-        "id, user_id, os_number, order_number, order_created_at, state, questionnaire, current_step, created_at, updated_at",
+        "id, user_id, os_number, order_number, order_created_at, state, questionnaire, music_title, current_step, created_at, updated_at",
       )
       .eq("user_id", user.id)
       .eq("state", state)
@@ -86,7 +87,7 @@ export async function createUserOrder(
       current_step: 1,
     })
     .select(
-      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, current_step, created_at, updated_at",
+      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, music_title, current_step, created_at, updated_at",
     )
     .single();
 
@@ -140,7 +141,7 @@ export async function updateUserOrderDraft(
     .eq("user_id", user.id)
     .eq("state", "QUESTIONÁRIO_ABERTO")
     .select(
-      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, current_step, created_at, updated_at",
+      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, music_title, current_step, created_at, updated_at",
     )
     .single();
 
@@ -179,7 +180,7 @@ export async function startMusicGeneration(
     .eq("user_id", user.id)
     .eq("state", "QUESTIONÁRIO_ABERTO")
     .select(
-      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, current_step, created_at, updated_at",
+      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, music_title, current_step, created_at, updated_at",
     )
     .single();
 
@@ -217,7 +218,7 @@ export async function getUserOrders(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, current_step, created_at, updated_at",
+      "id, user_id, os_number, order_number, order_created_at, state, questionnaire, music_title, current_step, created_at, updated_at",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })

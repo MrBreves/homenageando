@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
           "music_1_storage_path",
           "preview_1_storage_path",
           "lyrics_1",
+          "music_title",
         ].join(",")
       )
       .order("created_at", { ascending: false })
@@ -115,6 +116,7 @@ export async function GET(request: NextRequest) {
       music_1_storage_path: string | null;
       preview_1_storage_path: string | null;
       lyrics_1: string | null;
+      music_title: string | null;
     }>;
 
     const ids = [...new Set(registros.map((p) => p.user_id))];
@@ -190,22 +192,7 @@ export async function GET(request: NextRequest) {
       const cadastro = usuarios.get(pedido.user_id);
       const contato = perfis.get(pedido.user_id);
 
-      const tituloQuestionario =
-        typeof questionario.tituloMusica === "string"
-          ? questionario.tituloMusica.trim()
-          : "";
-
-      const primeiraLinha = (pedido.lyrics_1 ?? "")
-        .split(/\r?\n|\\n/)[0]
-        .trim();
-
-      const tituloLetra =
-        primeiraLinha.match(/^\*\*(.+?)\*\*$/)?.[1]?.trim() ?? "";
-
-      const titulo =
-        tituloQuestionario ||
-        tituloLetra ||
-        `Música da OS ${pedido.os_number ?? "—"}`;
+      const titulo = pedido.music_title;
 
       const nomeQuestionario =
         typeof questionario.nomeUsuario === "string"

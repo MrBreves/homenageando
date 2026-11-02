@@ -7,7 +7,6 @@ import Link from "next/link";
 import { getUserOrders, type Order } from "@/lib/order-service";
 import type { OrderState } from "@/types/order-state";
 import {
-  getMusicTitle,
   getMusicFileName,
 } from "@/lib/music-title";
 
@@ -880,9 +879,9 @@ export default function MinhasMusicasPage() {
               }}
             >
               {orders.map((order) => {
-                const musicTitle = getMusicTitle(
-                  order.questionnaire
-                );
+                const musicTitle =
+                  order.music_title ??
+                  "Título definitivo ainda não cadastrado";
 
                 return (
                   <li key={order.id}>
