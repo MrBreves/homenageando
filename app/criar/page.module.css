@@ -1263,3 +1263,58 @@
   }
 
 }
+
+/* AJUSTE EXCLUSIVO CAIXA VERDE CUPOM */
+@media (max-width: 599px) {
+
+  .paymentPage .couponSuccess {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 40px;
+    height: auto;
+    padding: 6px 10px;
+  }
+
+  .paymentPage .couponSuccessText {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+}
+
+/* AJUSTE FINAL PAGAMENTO E CAIXA VERDE */
+@media (max-width: 599px) {
+
+  /* 1. Subir o titulo Pagamento e o conteudo abaixo */
+  .paymentPage .container {
+    padding-top: 0 !important;
+  }
+
+  .paymentPage .container > h1 {
+    margin-top: -8px !important;
+  }
+
+  /* 2. Diminuir somente a altura da caixa verde */
+  /* 3. Centralizar o texto nos dois sentidos */
+  .paymentPage .couponSuccess {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 5px 10px !important;
+  }
+
+  .paymentPage .couponSuccessText {
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+}
