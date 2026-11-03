@@ -191,10 +191,25 @@ export async function POST(request: NextRequest) {
 
     if (
       event.type !== "payment" ||
-      String(data?.id ?? "") !== dataId ||
-      event.live_mode !== expectedLiveMode
+      String(data?.id ?? "") !== dataId
     ) {
       return response(400, "Evento incompatível.");
+    }
+
+    // A assinatura ja foi verificada antes deste bloco.
+    // Em producao, uma notificacao assinada com
+    // live_mode=false e reconhecida apenas como teste.
+    // Nenhum pagamento e consultado ou confirmado.
+    if (expectedLiveMode && event.live_mode === false) {
+      return response(
+        200,
+        "Notificação de teste recebida sem efeito financeiro.",
+      );
+    }
+
+    // Pagamentos reais mantem a validacao original.
+    if (event.live_mode !== expectedLiveMode) {
+      return response(400, "Ambiente de pagamento incompatível.");
     }
   } catch {
     return response(400, "Notificação inválida.");
