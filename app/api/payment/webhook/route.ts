@@ -18,6 +18,16 @@ type Payment = {
 };
 
 function response(status: number, message: string) {
+  // Diagnostico seguro para o Render.
+  // Registra apenas codigo HTTP e motivo interno da resposta.
+  // Nunca registra tokens, assinaturas ou dados do pagamento.
+  if (status >= 400) {
+    console.warn("[MP webhook] Rejeicao:", {
+      httpStatus: status,
+      reason: message,
+    });
+  }
+
   return NextResponse.json(
     { message },
     {
