@@ -1532,6 +1532,37 @@ if (questionnaireState === "PAGAMENTO") {
                   typeof result.checkoutUrl === "string" &&
                   result.checkoutUrl.startsWith("https://")
                 ) {
+                  const analyticsWindow = window as Window & {
+                    dataLayer?: Record<string, unknown>[];
+                  };
+
+                  analyticsWindow.dataLayer =
+                    analyticsWindow.dataLayer || [];
+
+                  if (
+                    typeof result.totalAmountCents === "number" &&
+                    Number.isInteger(result.totalAmountCents) &&
+                    result.totalAmountCents > 0
+                  ) {
+                    const checkoutValue = result.totalAmountCents / 100;
+
+                    analyticsWindow.dataLayer.push({
+                      event: "begin_checkout",
+                      ecommerce: {
+                        currency: "BRL",
+                        value: checkoutValue,
+                        items: [
+                          {
+                            item_id: "musica_personalizada",
+                            item_name: "Música personalizada",
+                            price: checkoutValue,
+                            quantity: 1,
+                          },
+                        ],
+                      },
+                    });
+                  }
+
                   window.location.assign(result.checkoutUrl);
                   return;
                 }
