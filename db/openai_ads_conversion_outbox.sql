@@ -129,14 +129,14 @@ create or replace function public.record_openai_ads_order_attribution(
 returns boolean
 language plpgsql security definer set search_path=''
 as $$
-declare v_created boolean := false;
+declare v_rows integer := 0;
 begin
  if current_user not in ('service_role','postgres') then
    raise exception 'Acesso restrito' using errcode='42501';
  end if;
  if p_order_id is null or p_oppref is null
    or length(p_oppref) not between 1 and 1024
-   or p_oppref !~ '^[A-Za-z0-9._~%-]+$'
+   or p_oppref !~ '^[A-Za-z0-9._~%+=/-]+$'
  then
    return false;
  end if;
@@ -144,8 +144,8 @@ begin
  select id,p_oppref from public.orders
  where id=p_order_id and payment_status='PENDING'
  on conflict (order_id) do nothing;
- get diagnostics v_created = row_count;
- return v_created;
+ get diagnostics v_rows = row_count;
+ return v_rows=1;
 end;
 $$;
 revoke all on function public.record_openai_ads_order_attribution(uuid,text) from public,anon,authenticated;
