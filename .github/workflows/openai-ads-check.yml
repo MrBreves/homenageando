@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Conversion unit tests
-        run: node --test tests/openai-conversions.test.mjs tests/openai-conversions-worker.test.mjs
+        run: node --test tests/openai-conversions.test.mjs tests/openai-conversions-worker.test.mjs tests/openai-ads-validation.test.mjs
       - name: TypeScript check
         run: npx tsc --noEmit
       - name: Next.js build
