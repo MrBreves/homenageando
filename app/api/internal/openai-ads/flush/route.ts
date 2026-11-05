@@ -14,7 +14,7 @@ function authorized(given: string | null, expected: string | undefined) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!authorized(request.headers.get("authorization"), process.env.OPENAI_ADS_RETRY_SECRET)) {
+  if (!authorized(request.headers.get("authorization"), process.env.OPENAI_ADS_RETRY_SECRET) && !authorized(request.headers.get("authorization"), process.env.OPENAI_ADS_CRON_SECRET)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
   const result = await flushOpenAIConversions();
