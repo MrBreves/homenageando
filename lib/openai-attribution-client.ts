@@ -2,7 +2,7 @@
 
 const STORAGE_KEY = "homenageando_openai_ads_attribution";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
-const VALID_REF = /^[A-Za-z0-9._~%-]{1,1024}$/;
+const VALID_REF = /^[A-Za-z0-9._~%+=/-]{1,1024}$/;
 
 export function storeConsentedOpenAIReference(oppref: string): boolean {
   if (typeof window === "undefined" || !VALID_REF.test(oppref)) return false;
