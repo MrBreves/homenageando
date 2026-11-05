@@ -90,7 +90,8 @@ create or replace function public.finish_openai_ads_conversion_event(
  p_payment_id text,
  p_sent boolean,
  p_http_status integer default null,
- p_expired boolean default false
+ p_expired boolean default false,
+ p_attempts integer default null
 )
 returns boolean
 language plpgsql security definer set search_path=''
@@ -110,16 +111,16 @@ begin
      next_attempt_at=case when p_sent then now()
        else now()+make_interval(secs=>least(3600, (power(2,least(attempts,10))::integer)*30)) end
  where o.payment_id=p_payment_id and o.status='pending'
-   and o.locked_until>now();
+   and o.locked_until>now() and o.attempts=p_attempts;
  get diagnostics v_updated=row_count;
  return v_updated=1;
 end;
 $$;
 
 revoke all on function public.claim_openai_ads_conversion_events(integer) from public,anon,authenticated;
-revoke all on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) from public,anon,authenticated;
+revoke all on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean,integer) from public,anon,authenticated;
 grant execute on function public.claim_openai_ads_conversion_events(integer) to service_role;
-grant execute on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) to service_role;
+grant execute on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean,integer) to service_role;
 
 -- Only the backend, after authenticating the order owner and receiving explicit
 -- measurement consent, may associate an OpenAI click reference with an order.
