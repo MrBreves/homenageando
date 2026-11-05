@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   });
   const { data: order, error: orderError } = await admin
     .from("orders").select("id").eq("id", body.orderId)
-    .eq("user_id", user.id).eq("payment_status", "PENDING").maybeSingle();
+    .eq("user_id", user.id).neq("payment_status", "APPROVED").maybeSingle();
   if (orderError) {
     return NextResponse.json({ error: "Indisponível" }, { status: 503 });
   }
