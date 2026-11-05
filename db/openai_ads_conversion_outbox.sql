@@ -89,7 +89,8 @@ $$;
 create or replace function public.finish_openai_ads_conversion_event(
  p_payment_id text,
  p_sent boolean,
- p_http_status integer default null
+ p_http_status integer default null,
+ p_expired boolean default false
 )
 returns boolean
 language plpgsql security definer set search_path=''
@@ -101,7 +102,7 @@ begin
  end if;
  update homenageando_private.openai_ads_conversion_outbox o
  set status=case when p_sent then 'sent'
-           when approved_at < now()-interval '6 days' then 'expired'
+           when p_expired or approved_at < now()-interval '6 days' then 'expired'
            else 'pending' end,
      sent_at=case when p_sent then now() else sent_at end,
      locked_until=null,
@@ -116,6 +117,6 @@ end;
 $$;
 
 revoke all on function public.claim_openai_ads_conversion_events(integer) from public,anon,authenticated;
-revoke all on function public.finish_openai_ads_conversion_event(text,boolean,integer) from public,anon,authenticated;
+revoke all on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) from public,anon,authenticated;
 grant execute on function public.claim_openai_ads_conversion_events(integer) to service_role;
-grant execute on function public.finish_openai_ads_conversion_event(text,boolean,integer) to service_role;
+grant execute on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) to service_role;
