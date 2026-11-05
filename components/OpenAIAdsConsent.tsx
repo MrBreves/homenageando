@@ -12,7 +12,7 @@ export default function OpenAIAdsConsent() {
   const [ref, setRef] = useState<string | null>(null);
   useEffect(() => {
     const parameter = new URL(window.location.href).searchParams.get("oppref");
-    if (parameter && /^[A-Za-z0-9._~%-]{1,1024}$/.test(parameter)) {
+    if (parameter && /^[A-Za-z0-9._~%+=/-]{1,1024}$/.test(parameter)) {
       setRef(parameter);
     }
   }, []);
