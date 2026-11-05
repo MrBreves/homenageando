@@ -29,4 +29,8 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
       - name: Next.js build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: integration-test-placeholder
+          NEXT_PUBLIC_SITE_URL: https://www.homenageando.com.br
         run: npm run build
