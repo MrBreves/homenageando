@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const VALID_REF = /^[A-Za-z0-9._~%-]{1,1024}$/;
+const VALID_REF = /^[A-Za-z0-9._~%+=/-]{1,1024}$/;
 
 export async function POST(request: NextRequest) {
   const authorization = request.headers.get("authorization");
