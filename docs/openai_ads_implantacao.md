@@ -5,7 +5,7 @@ Esta integração está na branch `feat/openai-ads-conversions`. Não aplicar o 
 
 ## Pré-requisitos
 1. A fonte de dados `Homenageando - Site` e a conversão personalizada `purchase_approved` já estão criadas na conta OpenAI Ads.
-2. No Supabase do Homenageando, aplicar somente o script revisado `db/openai_ads_conversion_outbox.sql` **após aprovação**. Ele cria duas tabelas no schema privado `homenageando_private`, um trigger de pagamento real e três RPCs de acesso exclusivo ao service_role.
+2. O SQL revisado `db/openai_ads_conversion_outbox.sql` foi aplicado no Supabase em 05/11/2026. Criou duas tabelas no schema privado `homenageando_private`, um trigger de pagamento real e três RPCs de acesso exclusivo ao service_role. **RLS das duas novas tabelas foi sinalizado pelo verificador como desativado; precisa de avaliação e autorização antes de ativar.**
 3. No Render (variáveis de ambiente do servidor):
    - `OPENAI_ADS_CONVERSION_API_KEY`: chave secreta criada na OpenAI Ads.
    - `OPENAI_ADS_PIXEL_ID`: ID do Pixel da fonte de dados.
@@ -25,7 +25,7 @@ Esta integração está na branch `feat/openai-ads-conversions`. Não aplicar o 
 - `node --test tests/openai-conversions.test.mjs tests/openai-conversions-worker.test.mjs`
 - `npx tsc --noEmit`
 - `npm run build` com variáveis de ambiente públicas válidas (sem segredos).
-- SQL foi validado sintaticamente com `BEGIN; ... ROLLBACK;`, sem mudar o banco.
+- SQL foi testado com `BEGIN; ... ROLLBACK;` e depois aplicado no banco. A migração `openai_ads_conversion_outbox` está registrada.
 - Testar a API com `validate_only: true` antes de enviar eventos reais, depois confirmar recepção em OpenAI Ads > Conversões > Fluxo de eventos.
 - Conferir o encaminhamento de `oppref` e a atribuição no painel.
 - Atualizar o aviso de privacidade para descrever a finalidade e a retenção das referências publicitárias antes da entrada em produção.
