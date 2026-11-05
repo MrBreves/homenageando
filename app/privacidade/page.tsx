@@ -151,6 +151,25 @@ export default function PrivacidadePage() {
             de acordo com sua finalidade e os requisitos legais aplicáveis.
           </p>
           <p>
+            Quando uma visita chega por um anúncio da OpenAI, o site pode
+            oferecer uma escolha específica para mensurar a publicidade.
+            Se você autorizar, a referência técnica do clique (oppref)
+            será guardada temporariamente na sessão do navegador e
+            associada ao pedido. Após confirmação de uma compra real,
+            o Homenageando poderá enviar à OpenAI o identificador do
+            evento, data, valor e a referência de atribuição, quando
+            disponível, para mensurar o desempenho da campanha.
+            A compra não depende dessa autorização.
+          </p>
+          <p>
+            A referência guardada no navegador expira em até 24 horas.
+            O registro da conversão no servidor possui controles de
+            acesso restrito e períodos de retenção que ainda serão
+            definidos na revisão final desta política. Para revogar
+            sua autorização e solicitar a interrupção do tratamento,
+            utilize o contato indicado na seção 7.
+          </p>
+          <p>
             Não compartilhe sua senha. Caso suspeite de acesso indevido
             à conta ou exposição de informações, comunique o atendimento.
           </p>
