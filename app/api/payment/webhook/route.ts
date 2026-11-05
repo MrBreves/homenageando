@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { reportApprovedPurchase } from "@/lib/openai-conversions.mjs";
 
 export const runtime = "nodejs";
 
@@ -413,11 +412,8 @@ export async function POST(request: NextRequest) {
     return response(409, "Confirmação não autorizada.");
   }
 
-  // Apenas compras reais em produção, após confirmação financeira no banco.
-  // Falhas do rastreamento não podem alterar o resultado do webhook.
-  if (expectedLiveMode) {
-    await reportApprovedPurchase({ paymentId: dataId, amountCents });
-  }
+  // O trigger isolado do Supabase enfileira compras reais confirmadas.
+  // O envio à OpenAI ocorre em outro processo e nunca bloqueia o pagamento.
 
   return response(200, "Notificação processada.");
 }
