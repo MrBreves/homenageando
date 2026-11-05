@@ -120,3 +120,33 @@ revoke all on function public.claim_openai_ads_conversion_events(integer) from p
 revoke all on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) from public,anon,authenticated;
 grant execute on function public.claim_openai_ads_conversion_events(integer) to service_role;
 grant execute on function public.finish_openai_ads_conversion_event(text,boolean,integer,boolean) to service_role;
+
+-- Only the backend, after authenticating the order owner and receiving explicit
+-- measurement consent, may associate an OpenAI click reference with an order.
+create or replace function public.record_openai_ads_order_attribution(
+  p_order_id uuid, p_oppref text
+)
+returns boolean
+language plpgsql security definer set search_path=''
+as $$
+declare v_created boolean := false;
+begin
+ if current_user not in ('service_role','postgres') then
+   raise exception 'Acesso restrito' using errcode='42501';
+ end if;
+ if p_order_id is null or p_oppref is null
+   or length(p_oppref) not between 1 and 1024
+   or p_oppref !~ '^[A-Za-z0-9._~%-]+$'
+ then
+   return false;
+ end if;
+ insert into homenageando_private.openai_ads_order_attribution(order_id,oppref)
+ select id,p_oppref from public.orders
+ where id=p_order_id and payment_status='PENDING'
+ on conflict (order_id) do nothing;
+ get diagnostics v_created = row_count;
+ return v_created;
+end;
+$$;
+revoke all on function public.record_openai_ads_order_attribution(uuid,text) from public,anon,authenticated;
+grant execute on function public.record_openai_ads_order_attribution(uuid,text) to service_role;
