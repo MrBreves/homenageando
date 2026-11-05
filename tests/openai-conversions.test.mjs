@@ -11,6 +11,7 @@ test("não envia evento sem credenciais", async () => {
   let calls = 0;
   const result = await reportApprovedPurchase({
     paymentId: "1234",
+    amountCents: 3990,
     env: {},
     fetchImpl: async () => { calls += 1; return { ok: true }; },
   });
@@ -21,6 +22,7 @@ test("não envia evento sem credenciais", async () => {
 test("não envia evento com identificador inválido", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "../../invalid",
+    amountCents: 3990,
     env,
     fetchImpl: async () => { throw Error("não pode chamar"); },
   });
@@ -32,6 +34,7 @@ test("envia o payload esperado, com ID estável e sem dados pessoais", async () 
   for (let i = 0; i < 2; i++) {
     const result = await reportApprovedPurchase({
       paymentId: "123456",
+      amountCents: 3990,
       approvedAtMs: 1793894400000,
       env,
       fetchImpl: async (url, options) => {
@@ -51,11 +54,13 @@ test("envia o payload esperado, com ID estável e sem dados pessoais", async () 
   assert.equal(events[0].type, "custom");
   assert.equal(events[0].custom_event_name, "purchase_approved");
   assert.equal(events[0].action_source, "web");
+  assert.deepEqual(events[0].data, { type: "custom", amount: 3990, currency: "BRL" });
 });
 
 test("uma falha externa não quebra o pagamento", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "1234",
+    amountCents: 3990,
     env,
     fetchImpl: async () => { throw new Error("network unavailable"); },
   });
@@ -65,6 +70,7 @@ test("uma falha externa não quebra o pagamento", async () => {
 test("resposta HTTP de erro não é considerada evento recebido", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "1234",
+    amountCents: 3990,
     env,
     fetchImpl: async () => ({ ok: false, status: 422 }),
   });
