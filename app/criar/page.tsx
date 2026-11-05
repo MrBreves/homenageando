@@ -51,6 +51,7 @@ import {
 
 import type { QuestionnaireAnswers } from "@/types/questionnaire";
 import { getMusicTitle } from "@/lib/music-title";
+import { getConsentedOpenAIReference } from "@/lib/openai-attribution-client";
 
 export default function CriarPage() {
 
@@ -141,6 +142,41 @@ export default function CriarPage() {
   } | null>(null);
 
   const [orderReference, setOrderReference] = useState<Pick<Order, "id" | "os_number"> | null>(null);
+
+  // Registra a referência do anúncio somente com consentimento explícito.
+  useEffect(() => {
+    if (!orderReference?.id) return;
+    let active = true;
+    const associateClick = async () => {
+      const oppref = getConsentedOpenAIReference();
+      if (!oppref || !active) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!active || !session) return;
+        await fetch("/api/ads/attribution", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            orderId: orderReference.id,
+            oppref,
+            measurementConsent: true,
+          }),
+        });
+      } catch {
+        // Falha de medição não altera o pedido nem a navegação.
+      }
+    };
+    void associateClick();
+    window.addEventListener("homenageando-openai-consent", associateClick);
+    return () => {
+      active = false;
+      window.removeEventListener("homenageando-openai-consent", associateClick);
+    };
+  }, [orderReference?.id]);
+
 
     const previewAudioRef = useRef<HTMLAudioElement>(null);
   const previewRequestRef = useRef(false);
