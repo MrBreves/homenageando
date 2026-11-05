@@ -23,6 +23,7 @@ test("não envia evento com identificador inválido", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "../../invalid",
     amountCents: 3990,
+    approvedAtMs: 1793894400000,
     env,
     fetchImpl: async () => { throw Error("não pode chamar"); },
   });
@@ -54,6 +55,7 @@ test("envia o payload esperado, com ID estável e sem dados pessoais", async () 
   assert.equal(events[0].type, "custom");
   assert.equal(events[0].custom_event_name, "purchase_approved");
   assert.equal(events[0].action_source, "web");
+  assert.equal(events[0].timestamp_ms, 1793894400000);
   assert.deepEqual(events[0].data, { type: "custom", amount: 3990, currency: "BRL" });
 });
 
@@ -61,6 +63,7 @@ test("uma falha externa não quebra o pagamento", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "1234",
     amountCents: 3990,
+    approvedAtMs: 1793894400000,
     env,
     fetchImpl: async () => { throw new Error("network unavailable"); },
   });
@@ -71,8 +74,45 @@ test("resposta HTTP de erro não é considerada evento recebido", async () => {
   const result = await reportApprovedPurchase({
     paymentId: "1234",
     amountCents: 3990,
+    approvedAtMs: 1793894400000,
     env,
     fetchImpl: async () => ({ ok: false, status: 422 }),
   });
   assert.deepEqual(result, { status: "failed", httpStatus: 422 });
+});
+
+test("inclui oppref consentido sem modificações", async () => {
+  const ref = "gAAAAAb+test/9==";
+  const result = await reportApprovedPurchase({
+    paymentId: "987654",
+    amountCents: 2990,
+    approvedAtMs: 1793894400000,
+    oppref: ref,
+    env,
+    fetchImpl: async (_url, options) => {
+      const event = JSON.parse(options.body).events[0];
+      assert.equal(event.oppref, ref);
+      assert.equal(event.data.amount, 2990);
+      return { ok: true };
+    },
+  });
+  assert.equal(result.status, "sent");
+});
+
+test("exige horário original válido e valor positivo", async () => {
+  const a = await reportApprovedPurchase({
+    paymentId: "222",
+    amountCents: 3990,
+    env,
+    fetchImpl: async () => { throw Error("não executar"); },
+  });
+  assert.equal(a.status, "invalid-timestamp");
+  const b = await reportApprovedPurchase({
+    paymentId: "222",
+    amountCents: 0,
+    approvedAtMs: 1793894400000,
+    env,
+    fetchImpl: async () => { throw Error("não executar"); },
+  });
+  assert.equal(b.status, "invalid-amount");
 });
