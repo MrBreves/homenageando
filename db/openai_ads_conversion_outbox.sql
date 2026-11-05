@@ -143,7 +143,7 @@ begin
  end if;
  insert into homenageando_private.openai_ads_order_attribution(order_id,oppref)
  select id,p_oppref from public.orders
- where id=p_order_id and payment_status='PENDING'
+ where id=p_order_id and payment_status is distinct from 'APPROVED'
  on conflict (order_id) do nothing;
  get diagnostics v_rows = row_count;
  return v_rows=1;
