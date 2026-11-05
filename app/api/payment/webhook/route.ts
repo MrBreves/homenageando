@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { flushOpenAIConversions } from "@/lib/openai-conversions-worker.mjs";
 
 export const runtime = "nodejs";
 
@@ -412,8 +413,18 @@ export async function POST(request: NextRequest) {
     return response(409, "Confirmação não autorizada.");
   }
 
-  // O trigger isolado do Supabase enfileira compras reais confirmadas.
-  // O envio à OpenAI ocorre em outro processo e nunca bloqueia o pagamento.
+  // A transação do banco enfileira compras reais via trigger.
+  // A execução ocorre após a resposta, sem alterar o pagamento.
+  // Um endpoint separado permite reprocessar eventos que falharam.
+  if (expectedLiveMode) {
+    after(async () => {
+      try {
+        await flushOpenAIConversions();
+      } catch {
+        console.warn("[OpenAI Ads] Processamento pós-webhook indisponível.");
+      }
+    });
+  }
 
   return response(200, "Notificação processada.");
 }
