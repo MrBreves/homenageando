@@ -416,7 +416,7 @@ export async function POST(request: NextRequest) {
   // Apenas compras reais em produção, após confirmação financeira no banco.
   // Falhas do rastreamento não podem alterar o resultado do webhook.
   if (expectedLiveMode) {
-    await reportApprovedPurchase({ paymentId: dataId });
+    await reportApprovedPurchase({ paymentId: dataId, amountCents });
   }
 
   return response(200, "Notificação processada.");
