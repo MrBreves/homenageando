@@ -165,59 +165,94 @@ async function handlePOST(request: NextRequest) {
         throw new Error("Resultado musical inválido.");
       }
 
-       const musicResult = parsed as Record<string, unknown>;
+      const musicResult = parsed as Record<string, unknown>;
 
-      if (
-        typeof musicResult.resultObject !== "object" ||
-        musicResult.resultObject === null ||
-        Array.isArray(musicResult.resultObject)
-      ) {
-        throw new Error("Objeto de resultado musical inválido.");
+      // A Kie AI pode retornar a música em resultObject.lyricsData
+      // (formato anterior) ou em response/data/resultUrls (API atual).
+      // Percorrer apenas estruturas conhecidas, mantendo a validação
+      // do identificador da tarefa e do endereço do MP3.
+      const containers: Record<string, unknown>[] = [musicResult];
+
+      for (let index = 0; index < containers.length && index < 8; index++) {
+        const container = containers[index];
+
+        for (const key of ["resultObject", "response", "data"]) {
+          const nested = container[key];
+
+          if (
+            nested &&
+            typeof nested === "object" &&
+            !Array.isArray(nested)
+          ) {
+            containers.push(nested as Record<string, unknown>);
+          }
+        }
       }
 
-      const resultObject = musicResult.resultObject as Record<
-        string,
-        unknown
-      >;
+      const audioCandidates: unknown[] = [];
 
-      if (
-        resultObject.code !== 200 ||
-        resultObject.taskId !== order.kie_task_id ||
-        !Array.isArray(resultObject.lyricsData)
-      ) {
-        console.error("[MUSIC_RESULT_VALIDATION]", {
-          code: resultObject.code,
-          taskIdMatches: resultObject.taskId === order.kie_task_id,
-          lyricsDataIsArray: Array.isArray(resultObject.lyricsData),
-        });
+      for (const container of containers) {
+        if (container.code !== undefined && container.code !== 200) {
+          throw new Error("Resultado musical retornou erro.");
+        }
 
-        throw new Error("Resultado incompatível com a tarefa.");
+        for (const idField of ["taskId", "task_id"]) {
+          const returnedId = container[idField];
+
+          if (
+            returnedId !== undefined &&
+            returnedId !== order.kie_task_id
+          ) {
+            throw new Error("Resultado incompatível com a tarefa.");
+          }
+        }
+
+        for (const listField of [
+          "lyricsData",
+          "sunoData",
+          "resultUrls",
+          "data",
+        ]) {
+          const list = container[listField];
+
+          if (Array.isArray(list)) {
+            audioCandidates.push(...list);
+          }
+        }
       }
 
       let audioUrl: URL | null = null;
 
-      for (const item of resultObject.lyricsData) {
-        if (
-          typeof item !== "object" ||
-          item === null ||
-          Array.isArray(item)
+      for (const item of audioCandidates) {
+        let rawAudioUrl: unknown;
+        let duration: unknown;
+
+        if (typeof item === "string") {
+          rawAudioUrl = item;
+        } else if (
+          item !== null &&
+          typeof item === "object" &&
+          !Array.isArray(item)
         ) {
+          const track = item as Record<string, unknown>;
+          rawAudioUrl = track.audio_url ?? track.audioUrl;
+          duration = track.duration;
+        } else {
           continue;
         }
 
-        const track = item as Record<string, unknown>;
-
         if (
-          typeof track.audio_url !== "string" ||
-          typeof track.duration !== "number" ||
-          !Number.isFinite(track.duration) ||
-          track.duration < 35
+          typeof rawAudioUrl !== "string" ||
+          (duration !== undefined &&
+            (typeof duration !== "number" ||
+              !Number.isFinite(duration) ||
+              duration < 35))
         ) {
           continue;
         }
 
         try {
-          const candidate = new URL(track.audio_url);
+          const candidate = new URL(rawAudioUrl);
 
           if (
             candidate.protocol === "https:" &&
@@ -225,7 +260,8 @@ async function handlePOST(request: NextRequest) {
             candidate.port === "" &&
             candidate.username === "" &&
             candidate.password === "" &&
-            candidate.pathname.startsWith("/r/") &&
+            (candidate.pathname.startsWith("/r/") ||
+              candidate.pathname.startsWith("/p/")) &&
             candidate.pathname.toLowerCase().endsWith(".mp3")
           ) {
             audioUrl = candidate;
@@ -234,6 +270,15 @@ async function handlePOST(request: NextRequest) {
         } catch {
           continue;
         }
+      }
+
+      if (!audioUrl) {
+        console.error("[MUSIC_RESULT_FORMAT]", {
+          containerKeys: containers.map((container) =>
+            Object.keys(container),
+          ),
+          candidateCount: audioCandidates.length,
+        });
       }
 
       if (!audioUrl) {
