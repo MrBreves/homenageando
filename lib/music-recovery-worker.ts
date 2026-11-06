@@ -1,25 +1,9 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
 import { storeGeneratedMusic } from "@/lib/store-generated-music";
-
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type Obj = Record<string, unknown>;
 const record = (v: unknown): v is Obj =>
   !!v && typeof v === "object" && !Array.isArray(v);
-
-function authenticate(header: string | null): boolean {
-  const secret = process.env.MUSIC_RECONCILE_SECRET;
-  if (!secret || secret.length < 32 || !header?.startsWith("Bearer ")) return false;
-  const candidate = header.slice(7);
-  if (candidate.length < 32 || candidate.length > 256) return false;
-  return timingSafeEqual(
-    createHash("sha256").update(secret).digest(),
-    createHash("sha256").update(candidate).digest(),
-  );
-}
 
 function musicUrl(task: Obj, taskId: string): URL | null {
   let parsed: unknown = task.resultJson;
@@ -110,15 +94,13 @@ async function download(url: URL): Promise<Buffer> {
   return Buffer.concat(chunks, size);
 }
 
-export async function POST(req: NextRequest) {
-  if (!authenticate(req.headers.get("authorization"))) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+export async function reconcilePendingMusic(): Promise<void> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const kieKey = process.env.KIE_API_KEY;
   if (!supabaseUrl || !key || !kieKey) {
-    return NextResponse.json({ error: "Configuração ausente" }, { status: 500 });
+    console.error("[MUSIC_WORKER_CONFIG] Configuração ausente.");
+    return;
   }
   const db = createClient(supabaseUrl, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -131,7 +113,7 @@ export async function POST(req: NextRequest) {
     .limit(3);
   if (error) {
     console.error("[MUSIC_RECONCILE_DB]", { code: error.code });
-    return NextResponse.json({ error: "Consulta indisponível" }, { status: 500 });
+    return;
   }
   const results: { id: string; status: string }[] = [];
   for (const order of orders ?? []) {
@@ -176,6 +158,13 @@ export async function POST(req: NextRequest) {
       results.push({ id: order.id, status: "error" });
     }
   }
-  return NextResponse.json({ checked: results.length, results },
-    { headers: { "Cache-Control": "no-store" } });
+  if (results.length) {
+    console.log("[MUSIC_WORKER_SUMMARY]", {
+      checked: results.length,
+      counts: results.reduce<Record<string, number>>((acc, item) => {
+        acc[item.status] = (acc[item.status] ?? 0) + 1;
+        return acc;
+      }, {}),
+    });
+  }
 }
