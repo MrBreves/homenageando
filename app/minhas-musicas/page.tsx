@@ -984,6 +984,26 @@ export default function MinhasMusicasPage() {
                           : STATUS_LABELS[order.state] ?? "Situação indisponível"}
                       </p>
 
+                      {order.state === "GERANDO_MUSICA_1" && (
+                        <Link
+                          href="/criar"
+                          aria-label={`Voltar ao acompanhamento da geração da OS ${String(order.os_number).padStart(4, "0")}`}
+                          style={{
+                            ...buttonStyle,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxSizing: "border-box",
+                            textDecoration: "none",
+                            fontWeight: 600,
+                            marginLeft: 10,
+                            verticalAlign: "top",
+                          }}
+                        >
+                          Voltar
+                        </Link>
+                      )}
+
                       {hasAdminGrant && (
                         <p
                           style={{
@@ -1028,7 +1048,6 @@ export default function MinhasMusicasPage() {
                       )}
 
                       {(order.state === "QUESTIONÁRIO_ABERTO" ||
-                        order.state === "GERANDO_MUSICA_1" ||
                         canContinuePayment) && (
                         <div style={{ marginTop: 16 }}>
                           <Link
@@ -1036,9 +1055,7 @@ export default function MinhasMusicasPage() {
                             aria-label={`${
                               order.state === "QUESTIONÁRIO_ABERTO"
                                 ? "Continuar questionário"
-                                : order.state === "GERANDO_MUSICA_1"
-                                  ? "Acompanhar geração"
-                                  : "Concluir pagamento"
+                                : "Concluir pagamento"
                             } da OS ${String(order.os_number).padStart(4, "0")}`}
                             style={{
                               ...buttonStyle,
@@ -1053,9 +1070,7 @@ export default function MinhasMusicasPage() {
                           >
                             {order.state === "QUESTIONÁRIO_ABERTO"
                               ? "Continuar questionário"
-                              : order.state === "GERANDO_MUSICA_1"
-                                ? "Acompanhar geração"
-                                : "Concluir pagamento"}
+                              : "Concluir pagamento"}
                           </Link>
                         </div>
                       )}
