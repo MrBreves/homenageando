@@ -1028,6 +1028,7 @@ export default function MinhasMusicasPage() {
                       )}
 
                       {(order.state === "QUESTIONÁRIO_ABERTO" ||
+                        order.state === "GERANDO_MUSICA_1" ||
                         canContinuePayment) && (
                         <div style={{ marginTop: 16 }}>
                           <Link
@@ -1035,7 +1036,9 @@ export default function MinhasMusicasPage() {
                             aria-label={`${
                               order.state === "QUESTIONÁRIO_ABERTO"
                                 ? "Continuar questionário"
-                                : "Concluir pagamento"
+                                : order.state === "GERANDO_MUSICA_1"
+                                  ? "Acompanhar geração"
+                                  : "Concluir pagamento"
                             } da OS ${String(order.os_number).padStart(4, "0")}`}
                             style={{
                               ...buttonStyle,
@@ -1050,7 +1053,9 @@ export default function MinhasMusicasPage() {
                           >
                             {order.state === "QUESTIONÁRIO_ABERTO"
                               ? "Continuar questionário"
-                              : "Concluir pagamento"}
+                              : order.state === "GERANDO_MUSICA_1"
+                                ? "Acompanhar geração"
+                                : "Concluir pagamento"}
                           </Link>
                         </div>
                       )}
