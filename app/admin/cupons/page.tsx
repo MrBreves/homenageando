@@ -46,6 +46,8 @@ export default function CuponsAdminPage() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const [copiado, setCopiado] = useState("");
+  const [ultimoCodigoCriado, setUltimoCodigoCriado] = useState("");
   const [codigo, setCodigo] = useState("");
   const [tipo, setTipo] = useState<"percent" | "fixed" | "final">("percent");
   const [valor, setValor] = useState("100");
@@ -83,6 +85,49 @@ export default function CuponsAdminPage() {
     setCodigo(gerarCodigoCupom());
   }, []);
 
+  useEffect(() => {
+    if (!copiado) return;
+    const timeout = window.setTimeout(() => setCopiado(""), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [copiado]);
+
+  async function copiarCodigo(codigoParaCopiar: string) {
+    if (!codigoParaCopiar) return;
+    let conseguiuCopiar = false;
+
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(codigoParaCopiar);
+        conseguiuCopiar = true;
+      } catch {
+        // Em navegadores móveis, tenta a alternativa de compatibilidade.
+      }
+    }
+
+    if (!conseguiuCopiar) {
+      const campo = document.createElement("textarea");
+      campo.value = codigoParaCopiar;
+      campo.readOnly = true;
+      campo.style.position = "fixed";
+      campo.style.opacity = "0";
+      document.body.appendChild(campo);
+      campo.select();
+      try {
+        conseguiuCopiar = document.execCommand("copy");
+      } catch {
+        conseguiuCopiar = false;
+      } finally {
+        campo.remove();
+      }
+    }
+
+    if (conseguiuCopiar) {
+      setCopiado(codigoParaCopiar);
+    } else {
+      setErro("Não foi possível copiar o código. Tente novamente.");
+    }
+  }
+
   async function criar(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSalvando(true); setErro(""); setSucesso("");
@@ -97,8 +142,9 @@ export default function CuponsAdminPage() {
       setErro("Confira código, desconto, limites e validade."); setSalvando(false); return;
     }
     try {
+      const codigoCriado = codigo.trim().toUpperCase();
       await chamar("POST", {
-        code: codigo.trim().toUpperCase(),
+        code: codigoCriado,
         discount_percent: tipo === "percent" ? numero : null,
         discount_fixed_cents: tipo === "fixed" ? cents : null,
         final_amount_cents: tipo === "final" ? cents : null,
@@ -107,6 +153,7 @@ export default function CuponsAdminPage() {
         valid_from: inicio ? new Date(`${inicio}T00:00:00`).toISOString() : new Date().toISOString(),
         expires_at: new Date(`${validade}T23:59:59`).toISOString(),
       });
+      setUltimoCodigoCriado(codigoCriado);
       setSucesso("Cupom criado."); setCodigo(gerarCodigoCupom()); await carregar();
     } catch (e) { setErro(e instanceof Error ? e.message : "Não foi possível criar o cupom."); }
     finally { setSalvando(false); }
@@ -133,6 +180,19 @@ export default function CuponsAdminPage() {
         </header>
         {erro && <p className={styles.error} role="alert">{erro}</p>}
         {sucesso && <p className={styles.success} role="status">{sucesso}</p>}
+        {ultimoCodigoCriado && (
+          <div className={styles.createdCoupon}>
+            <span>Último cupom criado: <strong>{ultimoCodigoCriado}</strong></span>
+            <button
+              type="button"
+              className={`${styles.secondary} ${styles.copyButton}`}
+              onClick={() => void copiarCodigo(ultimoCodigoCriado)}
+              aria-label={`Copiar código do cupom ${ultimoCodigoCriado}`}
+            >
+              {copiado === ultimoCodigoCriado ? "Copiado!" : "Copiar código"}
+            </button>
+          </div>
+        )}
         <div className={styles.grid}>
           <section className={styles.card}>
             <h2>Criar cupom</h2><p className={styles.note}>Novos cupons começam ativos. O desconto será limitado ao valor da compra.</p>
@@ -147,14 +207,25 @@ export default function CuponsAdminPage() {
     aria-label="Codigo do cupom gerado automaticamente"
   />
 </label>
-<button
-  type="button"
-  className={styles.secondary}
-  onClick={() => setCodigo(gerarCodigoCupom())}
-  disabled={salvando}
->
-  Gerar outro código
-</button>
+<div className={styles.codeActions}>
+  <button
+    type="button"
+    className={`${styles.secondary} ${styles.copyButton}`}
+    onClick={() => void copiarCodigo(codigo)}
+    disabled={!codigo}
+    aria-label="Copiar código do cupom gerado"
+  >
+    {copiado === codigo ? "Copiado!" : "Copiar código"}
+  </button>
+  <button
+    type="button"
+    className={styles.secondary}
+    onClick={() => setCodigo(gerarCodigoCupom())}
+    disabled={salvando}
+  >
+    Gerar outro código
+  </button>
+</div>
               <label className={styles.field}>Modalidade<select className={styles.select} value={tipo} onChange={e=>{setTipo(e.target.value as "percent" | "fixed" | "final");setValor("");}}><option value="percent">Percentual (%)</option><option value="fixed">Desconto fixo (R$)</option><option value="final">Valor final a pagar (R$)</option></select></label>
               <label className={styles.field}>{tipo === "percent" ? "Desconto (%)" : tipo === "final" ? "Valor final a pagar (R$)" : "Desconto (R$)"}<input className={styles.input} type="text" inputMode="decimal" value={valor} onChange={e=>setValor(e.target.value)} placeholder={tipo === "percent" ? "100" : tipo === "final" ? "1,00" : "10,00"} required /></label>
               {tipo === "final" && <p className={styles.note}>O valor deve ser maior que R$ 0,00 e menor que o valor da compra. Para cortesia, use Percentual (%) com 100%.</p>}
@@ -169,7 +240,20 @@ export default function CuponsAdminPage() {
             {carregando ? <p className={styles.note}>Carregando cupons...</p> : cupons.length === 0 ? <p className={styles.note}>Nenhum cupom encontrado.</p> : (
               <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Cupom</th><th>Desconto</th><th>Utilizações</th><th>Validade</th><th>Estado</th><th>Ação</th></tr></thead><tbody>
                 {cupons.map(c=><tr key={c.id}>
-                  <td>{c.code}<div className={styles.muted}>{c.orders.length ? c.orders.map(o=>`OS ${o.os_number ?? "—"} (${o.status})`).join(", ") : "Nenhuma OS vinculada"}</div></td>
+                  <td>
+                    <div className={styles.couponCode}>
+                      <span>{c.code}</span>
+                      <button
+                        type="button"
+                        className={`${styles.secondary} ${styles.copyButton}`}
+                        onClick={() => void copiarCodigo(c.code)}
+                        aria-label={`Copiar código do cupom ${c.code}`}
+                      >
+                        {copiado === c.code ? "Copiado!" : "Copiar"}
+                      </button>
+                    </div>
+                    <div className={styles.muted}>{c.orders.length ? c.orders.map(o=>`OS ${o.os_number ?? "—"} (${o.status})`).join(", ") : "Nenhuma OS vinculada"}</div>
+                  </td>
                   <td>{c.discount_percent != null ? `${c.discount_percent}%` : c.final_amount_cents != null ? `Pagar ${dinheiro(c.final_amount_cents)}` : `Desconto ${dinheiro(c.discount_fixed_cents ?? 0)}`}</td>
                   <td>{c.used_count} / {c.max_redemptions}<div className={styles.muted}>{c.reserved_count} reservados</div></td>
                   <td>{data(c.expires_at)}</td>

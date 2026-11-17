@@ -30,3 +30,9 @@
 .statusActive{color:#256335}.statusInactive{color:#a14828}
 @media(max-width:850px){.grid{grid-template-columns:1fr}}
 @media(max-width:599px){.page{padding:24px 14px 55px}.card{padding:16px}.row{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}.table{min-width:650px}}
+
+/* Copiar cupom: controles acessíveis ao toque, inclusive no celular. */
+.codeActions,.couponCode{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.couponCode{margin-bottom:5px}
+.copyButton{min-height:44px;padding:9px 13px}
+.createdCoupon{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px;margin:0 0 15px;border:1px solid #e6d7bd;border-radius:10px;background:#fffdf9;font-size:13px;color:#49301b;overflow-wrap:anywhere}
