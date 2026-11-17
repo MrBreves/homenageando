@@ -27,7 +27,7 @@ const playfairDisplay = Playfair_Display({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL("https://homenageando.com.br"),
   title: {
     default: "Homenageando | Músicas personalizadas",
     template: "%s | Homenageando",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/images/og-image.jpg",
+        url: "https://homenageando.com.br/images/og-image.jpg?v=2",
         width: 1200,
         height: 630,
         alt: "Homenageando — músicas personalizadas",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     title: "Homenageando | Músicas personalizadas",
     description:
       "Transforme seus sentimentos em uma homenagem única.",
-    images: ["/images/og-image.jpg"],
+    images: ["https://homenageando.com.br/images/og-image.jpg?v=2"],
   },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
