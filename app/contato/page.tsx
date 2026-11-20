@@ -274,10 +274,10 @@ export default function ContatoPage() {
 
         <div className="auth-switch">
           <p>Prefere enviar pelo seu e-mail?</p>
-          <a href="mailto:marcio.breves@gmail.com?subject=Contato%20Homenageando">
+          <a href="mailto:homenageando@yahoo.com?subject=Contato%20Homenageando">
             Abrir meu aplicativo de e-mail
           </a>
-          <p className="contact-email-address">marcio.breves@gmail.com</p>
+          <p className="contact-email-address">homenageando@yahoo.com</p>
         </div>
       </div>
     </section>
