@@ -1,0 +1,82 @@
+.toolbar {
+  margin: 20px 0 0;
+  padding: 16px;
+  border: 1px solid #dac7ab;
+  border-radius: 12px;
+  background: #fff0ce;
+  color: #2b1b13;
+}
+
+.toolbar p {
+  margin: 8px 0 12px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #b88130;
+  border-radius: 10px;
+  background: #fffaf2;
+  color: #2b1b13;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.button:focus-visible,
+.steps button:focus-visible {
+  outline: 2px solid #82501c;
+  outline-offset: 3px;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.steps button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #dac7ab;
+  border-radius: 8px;
+  background: #fffaf2;
+  color: #2b1b13;
+  font: inherit;
+  cursor: pointer;
+}
+
+.steps button[aria-current="step"] {
+  background: #82501c;
+  color: #fff;
+  border-color: #82501c;
+}
+
+.musicTitle {
+  margin: 28px auto 0;
+  padding: 18px 24px;
+  max-width: 540px;
+  border: 1px solid #e3bd79;
+  border-radius: 12px;
+  background: #fffaf2;
+  text-align: center;
+}
+
+.musicTitle h2 {
+  margin: 8px 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
