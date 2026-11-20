@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   } catch {
     return respond(
       503,
-      "O formulário está temporariamente indisponível. Entre em contato pelo e-mail marcio.breves@gmail.com."
+      "O formulário está temporariamente indisponível. Entre em contato pelo e-mail homenageando@yahoo.com."
     );
   }
 
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
   try {
     const limit = await consumeContactLimit(
       "ip",
-      contactIp(request, environment.local),
+      contactIp(request, environment.local, environment.render),
       environment.hashSecret
     );
 
@@ -313,7 +313,7 @@ export async function POST(request: Request) {
   } catch {
     return respond(
       502,
-      "Não foi possível confirmar o envio. Entre em contato pelo e-mail marcio.breves@gmail.com."
+      "Não foi possível confirmar o envio. Entre em contato pelo e-mail homenageando@yahoo.com."
     );
   }
 }
