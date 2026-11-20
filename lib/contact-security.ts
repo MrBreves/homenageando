@@ -9,6 +9,7 @@ export function contactEnvironment() {
     (process.env.NODE_ENV === "development" ? "local" : "");
 
   const netlify = runtime === "netlify";
+  const render = runtime === "render" || (!runtime && Boolean(process.env.RENDER));
 
   const raw =
     process.env.APP_ORIGIN?.trim() ||
@@ -39,7 +40,7 @@ export function contactEnvironment() {
     throw new Error("CONTACT_ORIGIN_CONFIG");
   }
 
-  if (!local && !netlify) {
+  if (!local && !netlify && !render) {
     throw new Error("CONTACT_HOSTING_ADAPTER_REQUIRED");
   }
 
@@ -54,22 +55,26 @@ export function contactEnvironment() {
     origin: url.origin,
     hostname: url.hostname,
     local,
+    render,
     hashSecret,
   };
 }
 
 export function contactIp(
   request: Request,
-  local: boolean
+  local: boolean,
+  render = false
 ): string {
   if (local) {
     return "local-development";
   }
 
-  // Na Netlify, utiliza apenas o header fornecido pela hospedagem.
-  const ip = request.headers
-    .get("x-nf-client-connection-ip")
-    ?.trim();
+  // No Render, usa o ultimo IP encaminhado pelo proxy de entrada,
+  // evitando confiar no primeiro valor potencialmente fornecido pelo cliente.
+  const forwarded = render ? request.headers.get("x-forwarded-for") : null;
+  const ip = render
+    ? forwarded?.split(",").at(-1)?.trim()
+    : request.headers.get("x-nf-client-connection-ip")?.trim();
 
   const family = ip ? isIP(ip) : 0;
 
