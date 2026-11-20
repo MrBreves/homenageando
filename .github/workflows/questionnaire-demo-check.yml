@@ -1,0 +1,34 @@
+name: Questionnaire demonstration checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/admin/**'
+      - 'app/criar/**'
+      - 'components/questionnaire/**'
+      - 'data/questionnaire-*.ts'
+      - 'lib/questionnaire-*.ts'
+      - 'playwright.config.ts'
+      - 'tests/demo/**'
+      - 'package*.json'
+      - '.github/workflows/questionnaire-demo-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  demonstration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Demo access, navigation, isolation and normal-flow regression
+        run: npm run test:demo

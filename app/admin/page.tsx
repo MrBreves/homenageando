@@ -214,6 +214,22 @@ export default function AdminPage() {
 
         {!carregando && indicadores && (
           <>
+            <section className={styles.managementSection} aria-labelledby="demonstracao-title">
+              <h2 id="demonstracao-title">Modo demonstração</h2>
+              <p>
+                Navegue pelas oito etapas e use “Preencher exemplo” para preparar
+                uma apresentação. Nenhum pedido ou música será criado.
+              </p>
+              <Link
+                href="/admin/demonstracao"
+                prefetch={false}
+                className={styles.refreshButton}
+                style={{ display: "inline-flex", textDecoration: "none", marginTop: 12 }}
+              >
+                Ativar modo demonstração
+              </Link>
+            </section>
+
             <section aria-labelledby="indicadores-title">
               <div className={styles.dashboardHeading}>
                 <h2 id="indicadores-title">Indicadores</h2>
