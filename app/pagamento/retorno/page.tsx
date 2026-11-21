@@ -61,7 +61,7 @@ export default function PagamentoRetornoPage() {
 
         const { data: order, error } = await supabase
           .from("orders")
-          .select("id, state, payment_status, payment_provider")
+          .select("id, state, payment_status, payment_provider, payment_amount_cents")
           .eq("id", orderId!)
           .eq("user_id", user.id)
           .maybeSingle();
@@ -80,7 +80,51 @@ export default function PagamentoRetornoPage() {
         if (
           order.payment_status === "APPROVED" &&
           order.state === "MUSICA_1_DISPONIVEL"
+
         ) {
+          // Somente compras reais confirmadas no banco sao enviadas para
+          // medicao. Cupons de 100% e pagamentos de teste nao contam.
+          if (
+            order.payment_provider === "MERCADO_PAGO_PROD" &&
+            Number.isInteger(order.payment_amount_cents) &&
+            order.payment_amount_cents > 0
+          ) {
+            const eventKey = `homenageando_ads_purchase_${order.id}`;
+            let alreadyReported = false;
+
+            try {
+              alreadyReported = window.sessionStorage.getItem(eventKey) === "sent";
+            } catch {
+              // Bloqueio de armazenamento nao deve impedir medicao.
+            }
+
+            if (!alreadyReported) {
+              try {
+                const analyticsWindow = window as Window & {
+                  dataLayer?: Record<string, unknown>[];
+                };
+
+                analyticsWindow.dataLayer = analyticsWindow.dataLayer || [];
+                analyticsWindow.dataLayer.push({
+                  event: "homenageando_purchase_approved",
+                  ecommerce: {
+                    transaction_id: order.id,
+                    currency: "BRL",
+                    value: order.payment_amount_cents / 100,
+                  },
+                });
+
+                try {
+                  window.sessionStorage.setItem(eventKey, "sent");
+                } catch {
+                  // A compra continua aprovada mesmo sem armazenamento.
+                }
+              } catch {
+                // Falhas de analytics nao afetam a confirmacao do pagamento.
+              }
+            }
+          }
+
           setStatus("approved");
           setMessage(
             "Pagamento confirmado! Sua música está disponível em Minhas músicas.",
