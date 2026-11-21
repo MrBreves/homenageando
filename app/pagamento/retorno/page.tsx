@@ -132,7 +132,8 @@ export default function PagamentoRetornoPage() {
         }
 
         if (
-          order.payment_provider !== "MERCADO_PAGO_TEST"
+          order.payment_provider !== "MERCADO_PAGO_TEST" &&
+          order.payment_provider !== "MERCADO_PAGO_PROD"
         ) {
           setStatus("error");
           setMessage(
