@@ -80,7 +80,6 @@ export default function PagamentoRetornoPage() {
         if (
           order.payment_status === "APPROVED" &&
           order.state === "MUSICA_1_DISPONIVEL"
-
         ) {
           // Somente compras reais confirmadas no banco sao enviadas para
           // medicao. Cupons de 100% e pagamentos de teste nao contam.
