@@ -20,6 +20,8 @@ export default function CadastroPage() {
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
+  const [cadastroPendente, setCadastroPendente] = useState(false);
 
   const requisitosSenha = [
     {
@@ -121,13 +123,32 @@ export default function CadastroPage() {
       return;
     }
 
+    setCadastroPendente(true);
     setMensagem(
-      "Cadastro realizado. Verifique seu e-mail para confirmar sua conta.",
+      "Sua solicitação foi recebida. Sua conta só poderá ser acessada após a confirmação do e-mail. Confira também Spam e Lixo eletrônico. Se já tentou se cadastrar, não precisa criar outra conta: use Reenviar confirmação.",
     );
+  }
 
-    setTimeout(() => {
-      router.push("/entrar");
-    }, 3000);
+  async function handleReenviarConfirmacao() {
+    if (reenviando || !email.trim()) return;
+    setErro("");
+    setReenviando(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) {
+        setErro(error.status === 429 ? "Muitas solicitações. Aguarde alguns minutos antes de tentar novamente." : "Não foi possível reenviar a confirmação. Entre em contato com o suporte se o problema continuar.");
+        return;
+      }
+      setMensagem("Se o cadastro estiver pendente, um novo e-mail de confirmação será enviado. Confira também Spam e Lixo eletrônico.");
+    } catch {
+      setErro("Não foi possível solicitar o reenvio. Tente novamente.");
+    } finally {
+      setReenviando(false);
+    }
   }
 
   return (
@@ -324,13 +345,16 @@ export default function CadastroPage() {
             </p>
           )}
 
-          <button
-            className="auth-submit"
-            type="submit"
-            disabled={carregando}
-          >
-            {carregando ? "Criando conta..." : "Criar conta"}
-          </button>
+          {!cadastroPendente && (
+            <button className="auth-submit" type="submit" disabled={carregando}>
+              {carregando ? "Criando conta..." : "Criar conta"}
+            </button>
+          )}
+          {cadastroPendente && (
+            <button className="auth-submit" type="button" disabled={reenviando} onClick={handleReenviarConfirmacao}>
+              {reenviando ? "Solicitando reenvio..." : "Reenviar e-mail de confirmação"}
+            </button>
+          )}
         </form>
 
         <p className="auth-switch">
