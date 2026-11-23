@@ -17,6 +17,9 @@ export default function EntrarPage() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [emailNaoConfirmado, setEmailNaoConfirmado] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
+  const [aviso, setAviso] = useState("");
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -26,6 +29,8 @@ export default function EntrarPage() {
     }
 
     setErro("");
+    setAviso("");
+    setEmailNaoConfirmado(false);
     setCarregando(true);
 
     try {
@@ -35,7 +40,12 @@ export default function EntrarPage() {
       });
 
       if (error) {
-        setErro("E-mail ou senha inválidos.");
+        if (error.code === "email_not_confirmed") {
+          setEmailNaoConfirmado(true);
+          setErro("Seu e-mail ainda não foi confirmado. Use o botão abaixo para solicitar outro link. Não é necessário fazer novo cadastro.");
+        } else {
+          setErro("E-mail ou senha inválidos.");
+        }
         return;
       }
 
@@ -45,6 +55,29 @@ export default function EntrarPage() {
       setErro("Não foi possível entrar. Tente novamente.");
     } finally {
       setCarregando(false);
+    }
+  }
+
+  async function handleReenviarConfirmacao() {
+    if (reenviando || !email.trim()) return;
+    setErro("");
+    setAviso("");
+    setReenviando(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) {
+        setErro(error.status === 429 ? "Muitas solicitações. Aguarde alguns minutos antes de tentar novamente." : "Não foi possível solicitar o e-mail. Entre em contato com o suporte se o problema continuar.");
+        return;
+      }
+      setAviso("Se a conta estiver aguardando confirmação, um novo link será enviado. Confira também Spam e Lixo eletrônico.");
+    } catch {
+      setErro("Não foi possível solicitar o reenvio. Tente novamente.");
+    } finally {
+      setReenviando(false);
     }
   }
 
@@ -114,6 +147,12 @@ export default function EntrarPage() {
             <p className="auth-message auth-message-error" role="alert">
               {erro}
             </p>
+          )}
+          {aviso && <p className="auth-message auth-message-success" role="status">{aviso}</p>}
+          {emailNaoConfirmado && (
+            <button className="auth-submit" type="button" disabled={reenviando || carregando} onClick={handleReenviarConfirmacao}>
+              {reenviando ? "Solicitando reenvio..." : "Reenviar e-mail de confirmação"}
+            </button>
           )}
 
           <button
