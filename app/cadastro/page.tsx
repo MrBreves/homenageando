@@ -125,7 +125,7 @@ export default function CadastroPage() {
 
     setCadastroPendente(true);
     setMensagem(
-      "Sua solicitação foi recebida. Sua conta só poderá ser acessada após a confirmação do e-mail. Confira também Spam e Lixo eletrônico. Se já tentou se cadastrar, não precisa criar outra conta: use Reenviar confirmação.",
+      "Se você já realizou seu cadastro, não precisa criar outra conta. Verifique sua caixa de entrada, Spam ou Lixo Eletrônico. Caso necessário, solicite um novo e-mail de confirmação. O acesso será liberado após a confirmação do e-mail.",
     );
   }
 
