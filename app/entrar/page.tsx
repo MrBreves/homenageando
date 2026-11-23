@@ -42,7 +42,7 @@ export default function EntrarPage() {
       if (error) {
         if (error.code === "email_not_confirmed") {
           setEmailNaoConfirmado(true);
-          setErro("Seu e-mail ainda não foi confirmado. Use o botão abaixo para solicitar outro link. Não é necessário fazer novo cadastro.");
+          setErro("Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada, Spam ou Lixo Eletrônico. Se necessário, use o botão abaixo para solicitar outro link de confirmação. Não é necessário fazer novo cadastro.");
         } else {
           setErro("E-mail ou senha inválidos.");
         }
