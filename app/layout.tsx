@@ -24,7 +24,7 @@ const playfairDisplay = Playfair_Display({
   weight: ["400", "500", "600", "700"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = "https://homenageando.com.br";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://homenageando.com.br"),
@@ -42,9 +42,6 @@ export const metadata: Metadata = {
     "homenagem",
     "música com inteligência artificial",
   ],
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -52,7 +49,6 @@ export const metadata: Metadata = {
     title: "Homenageando | Músicas personalizadas",
     description:
       "Transforme seus sentimentos em uma homenagem única com uma música criada a partir da sua história.",
-    url: "/",
     images: [
       {
         url: "https://homenageando.com.br/images/og-image.jpg?v=2",
@@ -105,12 +101,24 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Homenageando",
-    url: siteUrl,
-    description:
-      "Músicas personalizadas para transformar histórias e sentimentos em homenagens únicas.",
-    inLanguage: "pt-BR",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "Homenageando",
+        url: siteUrl,
+        logo: `${siteUrl}/images/png/icone_logo_512.png`,
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        name: "Homenageando",
+        url: siteUrl,
+        description: "Músicas personalizadas para transformar histórias e sentimentos em homenagens únicas.",
+        inLanguage: "pt-BR",
+        publisher: { "@id": `${siteUrl}/#organization` },
+      },
+    ],
   };
 
   return (
