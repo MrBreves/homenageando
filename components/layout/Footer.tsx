@@ -19,6 +19,8 @@ export default function Footer() {
         <p>www.homenageando.com.br</p>
 
         <nav className="footer-legal" aria-label="Documentos legais">
+          <Link href="/faq">Perguntas frequentes</Link>
+          <Link href="/contato">Contato</Link>
           <Link href="/termos" target="_blank" rel="noopener noreferrer">
             Termos de Uso
             <span className="footer-screen-reader"> (abre em nova aba)</span>
