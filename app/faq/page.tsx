@@ -1,15 +1,8 @@
-import type { Metadata } from "next";
+import { publicMetadata } from "@/lib/public-metadata";
 import Link from "next/link";
 import styles from "./faq.module.css";
 
-export const metadata: Metadata = {
-  title: "Perguntas frequentes",
-  description:
-    "Tire suas dúvidas sobre músicas personalizadas, preview, disponibilidade, pagamento e atendimento do Homenageando.",
-  alternates: {
-    canonical: "/faq",
-  },
-};
+export const metadata = publicMetadata("/faq", "Perguntas frequentes", "Tire suas dúvidas sobre músicas personalizadas, preview, disponibilidade, pagamento e atendimento do Homenageando.");
 
 const grupos = [
   {
