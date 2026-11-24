@@ -1,8 +1,6 @@
+import { publicMetadata } from "@/lib/public-metadata";
 
-export const metadata = {
-  title: "Exclusão de dados | Homenageando",
-  description: "Como solicitar a exclusão da conta e acompanhar seu pedido no Homenageando.",
-};
+export const metadata = publicMetadata("/exclusao-de-dados", "Exclusão de dados", "Como solicitar a exclusão da conta e acompanhar seu pedido no Homenageando.");
 
 export default function ExclusaoDeDadosPage() {
   return (
