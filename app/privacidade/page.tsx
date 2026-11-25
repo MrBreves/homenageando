@@ -21,8 +21,8 @@ export default function PrivacidadePage() {
             Márcio Breves é o responsável pelo Homenageando.
             Para assuntos relacionados aos seus dados pessoais,
             entre em contato pelo e-mail{" "}
-            <a href="mailto:marcio.breves@gmail.com">
-              marcio.breves@gmail.com
+            <a href="mailto:homenageando@yahoo.com">
+              homenageando@yahoo.com
             </a>.
           </p>
         </section>
@@ -134,8 +134,8 @@ export default function PrivacidadePage() {
           </p>
           <p>
             Envie sua solicitação para{" "}
-            <a href="mailto:marcio.breves@gmail.com">
-              marcio.breves@gmail.com
+            <a href="mailto:homenageando@yahoo.com">
+              homenageando@yahoo.com
             </a>.
             Podemos precisar confirmar sua identidade de forma proporcional
             para evitar entregar dados a outra pessoa.

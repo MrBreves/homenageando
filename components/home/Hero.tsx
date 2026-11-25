@@ -139,8 +139,8 @@ export default function Hero() {
           </h1>
 
           <p className={styles.description}>
-            <span>Momentos especiais se tornam</span>{" "}
-            <span>uma canção única e inesquecível.</span>
+            <span>Crie uma música personalizada</span>{" "}
+            <span>para homenagear alguém especial.</span>
           </p>
 
           <div className={styles.offer}>

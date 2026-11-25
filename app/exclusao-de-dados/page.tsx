@@ -21,7 +21,7 @@ export default function ExclusaoDeDadosPage() {
           <p>O procedimento também se aplica às contas criadas com Facebook e Google.</p>
           <p>
             Se não conseguir entrar, solicite ajuda pelo <a href="/contato">formulário de contato</a>
-            {" "}ou por <a href="mailto:marcio.breves@gmail.com">marcio.breves@gmail.com</a>.
+            {" "}ou por <a href="mailto:homenageando@yahoo.com">homenageando@yahoo.com</a>.
             Informe que deseja excluir a conta e o e-mail utilizado no cadastro.
             Nunca envie sua senha. Poderemos confirmar sua identidade para proteger seus dados.
           </p>

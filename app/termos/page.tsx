@@ -25,8 +25,8 @@ export default function TermosPage() {
           <p>
             O responsável pelo serviço é Márcio Breves, atuando como
             pessoa física. O contato para atendimento é{" "}
-            <a href="mailto:marcio.breves@gmail.com">
-              marcio.breves@gmail.com
+            <a href="mailto:homenageando@yahoo.com">
+              homenageando@yahoo.com
             </a>.
           </p>
         </section>
@@ -111,8 +111,8 @@ export default function TermosPage() {
           <p>
             A solicitação poderá ser feita pelo canal de atendimento
             do site ou pelo e-mail{" "}
-            <a href="mailto:marcio.breves@gmail.com">
-              marcio.breves@gmail.com
+            <a href="mailto:homenageando@yahoo.com">
+              homenageando@yahoo.com
             </a>.
             Informe o e-mail da conta e a identificação do pedido.
             Não envie senhas ou dados completos de cartão.

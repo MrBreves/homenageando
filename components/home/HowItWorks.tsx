@@ -7,21 +7,21 @@ const steps = [
     icon: "✎",
     title: "Conte a história",
     description:
-      "Conte quem será homenageado e compartilhe os momentos e sentimentos que tornam essa história especial.",
+      "Entre na sua conta e conte a história, a ocasião e os sentimentos de quem será homenageado.",
   },
   {
     number: "02",
     icon: "♫",
     title: "Ouça um trecho da música",
     description:
-      "Sua história se transforma em uma música personalizada. Você recebe um trecho de 35 segundos para ouvir.",
+      "Criamos sua música personalizada com inteligência artificial. Ouça uma prévia de 35 segundos antes de comprar.",
   },
   {
     number: "03",
     icon: "↓",
     title: "Obtenha a música",
     description:
-      "Com a compra, você recebe a música completa e a letra para baixar e guardar essa homenagem.",
+      "Após a aprovação do pagamento, baixe a música completa em MP3 e a letra em PDF.",
   },
 ];
 
