@@ -16,7 +16,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-information">
-        <p>www.homenageando.com.br</p>
+        <p>homenageando.com.br</p>
 
         <nav className="footer-legal" aria-label="Documentos legais">
           <Link href="/faq">Perguntas frequentes</Link>
