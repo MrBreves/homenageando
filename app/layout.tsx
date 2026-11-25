@@ -108,6 +108,7 @@ export default function RootLayout({
         name: "Homenageando",
         url: siteUrl,
         logo: `${siteUrl}/images/png/icone_logo_512.png`,
+        sameAs: ["https://www.youtube.com/@Homenageandomusicas"],
       },
       {
         "@type": "WebSite",
