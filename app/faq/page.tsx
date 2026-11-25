@@ -26,7 +26,7 @@ const grupos = [
       {
         pergunta: "Preciso criar uma conta antes de começar?",
         resposta:
-          "Você pode começar o questionário sem estar conectado. Antes de iniciar a geração da música, será necessário entrar na sua conta ou fazer o cadastro.",
+          "Sim. Você pode conhecer o serviço e ouvir o exemplo de música na página inicial sem entrar na conta. Para acessar o questionário e criar sua música personalizada, entre na sua conta ou faça o cadastro.",
       },
       {
         pergunta: "Por que os campos do questionário são obrigatórios?",
@@ -41,8 +41,18 @@ const grupos = [
     ],
   },
   {
-    titulo: "Preview e disponibilidade",
+    titulo: "Preço, entrega e disponibilidade",
     perguntas: [
+      {
+        pergunta: "Quanto custa uma música personalizada?",
+        resposta:
+          "A música personalizada custa R$ 39,90 e inclui o arquivo completo em MP3 e a letra em PDF. Você pode ouvir uma prévia antes de decidir pela compra.",
+      },
+      {
+        pergunta: "Quanto tempo leva para criar uma música personalizada?",
+        resposta:
+          "A geração da música leva aproximadamente 5 minutos. Após a aprovação do pagamento, você pode baixar a música completa em MP3 e a letra em PDF.",
+      },
       {
         pergunta: "O que é o preview da música?",
         resposta:
@@ -51,7 +61,7 @@ const grupos = [
       {
         pergunta: "Quantas vezes posso ouvir o preview?",
         resposta:
-          "O limite aprovado é de 5 reproduções por solicitação. As reproduções são contabilizadas; atualizar a página não deve renovar esse limite.",
+          "Você pode ouvir o preview até 5 vezes por solicitação. As reproduções são contabilizadas; atualizar a página não deve renovar esse limite.",
       },
       {
         pergunta: "Por quanto tempo o preview fica disponível sem compra?",
@@ -96,7 +106,7 @@ const grupos = [
       {
         pergunta: "Como solicito ajuda ou reembolso?",
         resposta:
-          "Use a página Contato ou envie um e-mail para marcio.breves@gmail.com. Informe o e-mail usado na conta, o número da OS quando disponível e descreva sua solicitação. Não envie sua senha nem dados completos de cartão.",
+          "Use a página Contato ou envie um e-mail para homenageando@yahoo.com. Informe o e-mail usado na conta, o número da OS quando disponível e descreva sua solicitação. Não envie sua senha nem dados completos de cartão.",
       },
       {
         pergunta: "Solicitar reembolso significa receber o estorno imediatamente?",
@@ -108,8 +118,20 @@ const grupos = [
 ];
 
 export default function FaqPage() {
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: grupos.flatMap((grupo) =>
+      grupo.perguntas.map((item) => ({
+        "@type": "Question",
+        name: item.pergunta,
+        acceptedAnswer: { "@type": "Answer", text: item.resposta },
+      }))
+    ),
+  };
   return (
     <section className={styles.page} aria-labelledby="faq-title">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }} />
       <div className={styles.card}>
         <header className={styles.heading}>
           <p className={styles.eyebrow}>Como podemos ajudar?</p>
