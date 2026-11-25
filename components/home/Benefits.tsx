@@ -24,7 +24,7 @@ const benefits = [
       </svg>
     ),
     title: "Seguro e confiável",
-    text: "Seus dados protegidos e privacidade garantida.",
+    text: "Tratamento de dados conforme nossa política de privacidade.",
   },
   {
     icon: (
@@ -51,7 +51,7 @@ const benefits = [
       </svg>
     ),
     title: "Para todas as ocasiões",
-    text: "Amor, família, amizade, conquistas e muito mais.",
+    text: "Aniversários, casamentos, bodas, família e amizade.",
   },
 ];
 
