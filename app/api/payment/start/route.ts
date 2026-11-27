@@ -1,5 +1,6 @@
 
 import { createHmac } from "node:crypto";
+import { blackFriday } from "@/lib/black-friday";
 import { withAccountOperation } from "@/lib/account-deletion.mjs";
 import { createMercadoPagoPreference, recoverMercadoPagoPreference } from "@/lib/mercadopago-preferences";
 import { createClient } from "@supabase/supabase-js";
@@ -271,7 +272,8 @@ async function handlePOST(request: NextRequest) {
     currentOrder.payment_status === "PENDING"
   ) {
     const existingCode = (currentOrder.applied_coupon_code ?? "").toUpperCase();
-    if (couponCode !== existingCode) {
+    const requestedCode = couponCode || (existingCode === blackFriday.couponCode ? existingCode : "");
+    if (requestedCode !== existingCode) {
       if (!couponCode) {
         return fail("Para substituir o cupom, informe e valide um novo código.", 409);
       }
@@ -656,7 +658,7 @@ async function handlePOST(request: NextRequest) {
     {
       p_order_id: orderId,
       p_user_id: user.id,
-      p_coupon_code: couponCode,
+      p_coupon_code: couponCode || blackFriday.couponCode,
       p_provider: paymentProvider,
     }
   );

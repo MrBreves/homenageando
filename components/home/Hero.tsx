@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./Hero.module.css";
 import { supabase } from "@/lib/supabase";
+import { blackFriday } from "@/lib/black-friday";
 
 export default function Hero() {
   const router = useRouter();
@@ -146,7 +147,12 @@ export default function Hero() {
           <div className={styles.offer}>
             <div className={styles.priceBlock}>
               <span className={styles.priceLabel}>Sua música completa por</span>
-              <strong className={styles.price}>R$ 39,90</strong>
+              <div className={styles.priceRow}>
+                <strong className={styles.price}>{blackFriday.price}</strong>
+                <s className={styles.originalPrice} aria-label={`Preço original: ${blackFriday.originalPrice}`}>
+                  {blackFriday.originalPrice}
+                </s>
+              </div>
               <span className={styles.included}>
                 MP3 + letra em PDF
                 <audio

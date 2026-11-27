@@ -46,7 +46,7 @@ const grupos = [
       {
         pergunta: "Quanto custa uma música personalizada?",
         resposta:
-          "A música personalizada custa R$ 39,90 e inclui o arquivo completo em MP3 e a letra em PDF. Você pode ouvir uma prévia antes de decidir pela compra.",
+          "Na Black Friday, a música personalizada custa R$ 29,90 e inclui o arquivo completo em MP3 e a letra em PDF. Você pode ouvir uma prévia antes de decidir pela compra.",
       },
       {
         pergunta: "Quanto tempo leva para criar uma música personalizada?",

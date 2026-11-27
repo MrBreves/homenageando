@@ -1,3 +1,49 @@
+.promotion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3px clamp(12px, 1.75vw, 26px);
+  padding: 7px 12px;
+  border-bottom: 1px solid #d9aa3b;
+  background: #080706;
+  color: #f5e7cd;
+  font-family: var(--font-playfair-display), Georgia, serif;
+  font-size: clamp(15px, 1.65vw, 24px);
+  line-height: 1.25;
+  text-align: center;
+}
+
+.promotionTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(12px, 1.75vw, 26px);
+  color: #f5bd49;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.promotionTitle strong + strong {
+  padding-left: clamp(12px, 1.75vw, 26px);
+  border-left: 1px solid #d9aa3b;
+}
+
+.promotionPrice {
+  padding-left: clamp(12px, 1.75vw, 26px);
+  border-left: 1px solid #d9aa3b;
+  white-space: nowrap;
+}
+
+@media (max-width: 540px) {
+  .promotionPrice {
+    flex-basis: 100%;
+    padding-left: 0;
+    border-left: 0;
+    font-size: 14px;
+  }
+}
+
 .hero {
   --hero-height: 690px;
   --hero-pad-top: 48px;
@@ -131,6 +177,19 @@
   font-family: var(--font-playfair-display), Georgia, "Times New Roman", serif;
   font-size: 38px;
   line-height: 1;
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: clamp(8px, 1.35vw, 22px);
+}
+
+.originalPrice {
+  color: #514137;
+  font-size: clamp(13px, 1.45vw, 21px);
+  white-space: nowrap;
 }
 
 .included {

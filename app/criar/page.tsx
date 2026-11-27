@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 
 import styles from "./page.module.css";
+import { blackFriday } from "@/lib/black-friday";
 
 import GeneratingMusic from "@/components/questionnaire/GeneratingMusic";
 import QuestionnaireNavigation from "@/components/questionnaire/QuestionnaireNavigation";
@@ -1430,6 +1431,13 @@ if (questionnaireState === "PAGAMENTO") {
             <span>R$ 39,90</span>
           </div>
 
+          {!appliedCoupon && !paymentStarted && (
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginTop: 12 }}>
+              <span>Black Friday · {blackFriday.discountLabel}</span>
+              <span style={{ color: "#237a37" }}>− R$ 10,00</span>
+            </div>
+          )}
+
           {appliedCoupon && (
             <div
               style={{
@@ -1470,7 +1478,7 @@ if (questionnaireState === "PAGAMENTO") {
             <strong>
               R${" "}
               {(
-                (appliedCoupon?.totalAmountCents ?? 3990) /
+                (appliedCoupon?.totalAmountCents ?? (paymentStarted ? 3990 : blackFriday.amountCents)) /
                 100
               ).toFixed(2).replace(".", ",")}
             </strong>
