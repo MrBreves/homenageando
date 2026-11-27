@@ -5,7 +5,19 @@ import Benefits from "@/components/home/Benefits";
 import { blackFriday } from "@/lib/black-friday";
 import styles from "@/components/home/Hero.module.css";
 
-export const metadata = publicMetadata("/", "Homenageando | Músicas personalizadas", "Crie uma música personalizada para homenagear alguém especial. Ouça uma prévia antes de comprar e receba a música completa em MP3 e a letra em PDF por " + blackFriday.price + ".");
+const homeMetadata = publicMetadata("/", "Homenageando | Músicas personalizadas", "Crie uma música personalizada para homenagear alguém especial. Ouça uma prévia antes de comprar e receba a música completa em MP3 e a letra em PDF por " + blackFriday.price + ".");
+const shareImage = {
+  url: `${SITE_URL}/images/og-black-friday-2026.jpg`,
+  width: 1200,
+  height: 630,
+  alt: "Homenageando Black Friday: 25% OFF, de R$ 39,90 por R$ 29,90",
+};
+
+export const metadata = {
+  ...homeMetadata,
+  openGraph: { ...homeMetadata.openGraph, images: [shareImage] },
+  twitter: { ...homeMetadata.twitter, images: [shareImage] },
+};
 
 const serviceJsonLd = {
   "@context": "https://schema.org",
